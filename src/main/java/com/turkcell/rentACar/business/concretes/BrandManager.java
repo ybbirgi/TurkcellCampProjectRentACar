@@ -3,6 +3,8 @@ package com.turkcell.rentACar.business.concretes;
 import com.turkcell.rentACar.business.abstracts.BrandService;
 import com.turkcell.rentACar.business.dtos.BrandListDto;
 import com.turkcell.rentACar.business.requests.CreateBrandRequest;
+import com.turkcell.rentACar.business.requests.DeleteBrandRequest;
+import com.turkcell.rentACar.business.requests.UpdateBrandRequest;
 import com.turkcell.rentACar.core.utilities.mapping.ModelMapperService;
 import com.turkcell.rentACar.dataAccess.abstracts.BrandDao;
 import com.turkcell.rentACar.entities.concretes.Brand;
@@ -43,9 +45,22 @@ public class BrandManager implements BrandService {
         return brandListDto;
     }
 
+    @Override
+    public void update(UpdateBrandRequest updateBrandRequest) {
+        Brand brand = brandDao.getById(updateBrandRequest.getBrandId());
+        brand = this.modelMapperService.forRequest().map(updateBrandRequest,Brand.class);
+        this.brandDao.save(brand);
+    }
+
+    @Override
+    public void delete(DeleteBrandRequest DeleteBrandRequest) {
+        Brand brand = this.modelMapperService.forRequest().map(DeleteBrandRequest,Brand.class);
+        this.brandDao.delete(brand);
+    }
+
 
     void checkIfSameBrand(Brand brand) throws Exception {
-        if(this.brandDao.getAllByName(brand.getName()).stream().count()!=0)
+        if(this.brandDao.getAllByBrandName(brand.getBrandName()).stream().count()!=0)
             throw new Exception("This brand already exists");
 
     }

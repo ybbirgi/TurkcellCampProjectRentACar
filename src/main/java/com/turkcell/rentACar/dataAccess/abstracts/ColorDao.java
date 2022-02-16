@@ -9,5 +9,5 @@ import java.util.List;
 
 @Repository
 public interface ColorDao extends JpaRepository<Color,Integer> {
-    List<Color> getAllByName(String name);
+    List<Color> getAllByColorName(String name);
 }

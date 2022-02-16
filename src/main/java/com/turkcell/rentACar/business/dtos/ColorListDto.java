@@ -13,5 +13,5 @@ import javax.persistence.Id;
 @NoArgsConstructor
 
 public class ColorListDto {
-    private String name;
+    private String colorName;
 }

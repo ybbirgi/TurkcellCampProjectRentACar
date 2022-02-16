@@ -2,7 +2,7 @@ package com.turkcell.rentACar.api.controllers;
 
 import com.turkcell.rentACar.business.abstracts.BrandService;
 import com.turkcell.rentACar.business.dtos.BrandListDto;
-import com.turkcell.rentACar.business.requests.CreateBrandRequest;
+import com.turkcell.rentACar.business.requests.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,5 +26,14 @@ public class BrandsController {
     @PostMapping("/add")
     public void add(@RequestBody CreateBrandRequest createBrandRequest) throws Exception {
         this.brandService.add(createBrandRequest);
+    }
+    @PostMapping("/update")
+    public void update(@RequestBody UpdateBrandRequest updateBrandRequest){
+        this.brandService.update(updateBrandRequest);
+    }
+
+    @PostMapping("/delete")
+    public void delete(@RequestBody DeleteBrandRequest deleteBrandRequest){
+        this.brandService.delete(deleteBrandRequest);
     }
 }

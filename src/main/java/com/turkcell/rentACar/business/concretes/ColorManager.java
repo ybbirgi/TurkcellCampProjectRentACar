@@ -1,12 +1,12 @@
 package com.turkcell.rentACar.business.concretes;
 
 import com.turkcell.rentACar.business.abstracts.ColorService;
-import com.turkcell.rentACar.business.dtos.BrandListDto;
 import com.turkcell.rentACar.business.dtos.ColorListDto;
 import com.turkcell.rentACar.business.requests.CreateColorRequest;
+import com.turkcell.rentACar.business.requests.DeleteColorRequest;
+import com.turkcell.rentACar.business.requests.UpdateColorRequest;
 import com.turkcell.rentACar.core.utilities.mapping.ModelMapperManager;
 import com.turkcell.rentACar.dataAccess.abstracts.ColorDao;
-import com.turkcell.rentACar.entities.concretes.Brand;
 import com.turkcell.rentACar.entities.concretes.Color;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,8 +49,21 @@ public class ColorManager implements ColorService {
         return colorListDto;
     }
 
+    @Override
+    public void update(UpdateColorRequest updateColorRequest) {
+        Color color = colorDao.getById(updateColorRequest.getColorId());
+        color = this.modelMapperService.forRequest().map(updateColorRequest,Color.class);
+        this.colorDao.save(color);
+    }
+
+    @Override
+    public void delete(DeleteColorRequest DeleteColorRequest) {
+        Color color = this.modelMapperService.forRequest().map(DeleteColorRequest,Color.class);
+        this.colorDao.delete(color);
+    }
+
     void checkIfSameColor(Color color) throws Exception {
-        if(this.colorDao.getAllByName(color.getName()).stream().count()!=0)
+        if(this.colorDao.getAllByColorName(color.getColorName()).stream().count()!=0)
             throw new Exception("This brand already exists");
         /*List<Color> colors = colorDao.findAll();
         for (Color c:colors) {

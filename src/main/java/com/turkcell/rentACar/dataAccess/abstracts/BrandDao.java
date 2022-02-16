@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface BrandDao extends JpaRepository<Brand,Integer> {
-    List<Brand> getAllByName(String name);
+    List<Brand> getAllByBrandName(String name);
 }
