@@ -1,8 +1,14 @@
 package com.turkcell.rentACar.api.controllers;
 
 import com.turkcell.rentACar.business.abstracts.BrandService;
+import com.turkcell.rentACar.business.dtos.BrandDto;
 import com.turkcell.rentACar.business.dtos.BrandListDto;
-import com.turkcell.rentACar.business.requests.*;
+import com.turkcell.rentACar.business.requests.creates.CreateBrandRequest;
+import com.turkcell.rentACar.business.requests.deletes.DeleteBrandRequest;
+import com.turkcell.rentACar.business.requests.updates.UpdateBrandRequest;
+import com.turkcell.rentACar.core.utilities.exceptions.BusinessException;
+import com.turkcell.rentACar.core.utilities.results.DataResult;
+import com.turkcell.rentACar.core.utilities.results.Result;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,23 +23,25 @@ public class BrandsController {
     }
 
     @GetMapping("/getAll")
-    public List<BrandListDto> getAll(){
+    public DataResult<List<BrandListDto>> getAll(){
         return this.brandService.getAll();
     }
+
     @GetMapping("/getById")
-    public BrandListDto getById(@RequestParam int id){return this.brandService.getById(id);}
+    public DataResult<BrandDto> getById(@RequestParam int id){return this.brandService.getById(id);}
 
     @PostMapping("/add")
-    public void add(@RequestBody CreateBrandRequest createBrandRequest) throws Exception {
-        this.brandService.add(createBrandRequest);
+    public Result add(@RequestBody CreateBrandRequest createBrandRequest) throws BusinessException {
+        return this.brandService.add(createBrandRequest);
     }
-    @PostMapping("/update")
-    public void update(@RequestBody UpdateBrandRequest updateBrandRequest){
-        this.brandService.update(updateBrandRequest);
+    @PutMapping("/update")
+    public Result update(@RequestBody UpdateBrandRequest updateBrandRequest) throws BusinessException{
+        return this.brandService.update(updateBrandRequest);
     }
 
-    @PostMapping("/delete")
-    public void delete(@RequestBody DeleteBrandRequest deleteBrandRequest){
-        this.brandService.delete(deleteBrandRequest);
+    @DeleteMapping("/delete")
+    public Result delete(@RequestBody DeleteBrandRequest deleteBrandRequest) throws BusinessException{
+        return this.brandService.delete(deleteBrandRequest);
     }
+
 }

@@ -1,4 +1,4 @@
-package com.turkcell.rentACar.business.requests;
+package com.turkcell.rentACar.business.requests.deletes;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateColorRequest {
-    private String brandName;
+public class DeleteCarRequest {
+    private int carId;
 }
+

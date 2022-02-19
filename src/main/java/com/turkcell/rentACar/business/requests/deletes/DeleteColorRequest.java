@@ -1,4 +1,4 @@
-package com.turkcell.rentACar.business.requests;
+package com.turkcell.rentACar.business.requests.deletes;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

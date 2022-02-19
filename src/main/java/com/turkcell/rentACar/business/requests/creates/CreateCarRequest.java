@@ -1,4 +1,4 @@
-package com.turkcell.rentACar.business.requests;
+package com.turkcell.rentACar.business.requests.creates;
 
 import com.turkcell.rentACar.entities.concretes.Brand;
 import com.turkcell.rentACar.entities.concretes.Color;

@@ -1,4 +1,4 @@
-package com.turkcell.rentACar.business.dtos;
+package com.turkcell.rentACar.business.requests.deletes;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 
-public class ColorListDto {
-    private String colorName;
+public class DeleteBrandRequest {
+    private int brandId;
 }

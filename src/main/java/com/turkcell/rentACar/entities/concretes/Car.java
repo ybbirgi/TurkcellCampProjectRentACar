@@ -27,10 +27,10 @@ public class Car {
     private String carDescription;
 
     @ManyToOne
-    @JoinColumn(name = "brand_name")
+    @JoinColumn(name = "brand_id")
     private Brand brand;
 
     @ManyToOne
-    @JoinColumn(name = "color_name")
+    @JoinColumn(name = "color_id")
     private Color color;
 }

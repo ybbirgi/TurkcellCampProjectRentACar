@@ -1,4 +1,4 @@
-package com.turkcell.rentACar.business.requests;
+package com.turkcell.rentACar.business.requests.updates;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,6 +12,6 @@ public class UpdateCarRequest {
     private double carDailyPrice;
     private int carModelYear;
     private String carDescription;
-    private String colorId;
-    private String brandId;
+    private int colorId;
+    private int brandId;
 }
