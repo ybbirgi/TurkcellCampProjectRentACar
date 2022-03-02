@@ -23,7 +23,7 @@ public class CarMaintenancesController {
     @PostMapping("/add")
     Result add(@RequestBody CreateCarMaintenanceRequest createCarMaintenanceRequest){return carMaintenanceService.add(createCarMaintenanceRequest);}
     @PutMapping("/update")
-    Result update(@RequestParam int id,@RequestBody UpdateCarMaintenanceRequest updateCarMaintenanceRequest){return carMaintenanceService.update(id,updateCarMaintenanceRequest);}
+    Result update(@RequestBody UpdateCarMaintenanceRequest updateCarMaintenanceRequest){return carMaintenanceService.update(updateCarMaintenanceRequest);}
     @DeleteMapping("/delete")
     Result delete(@RequestBody DeleteCarMaintenanceRequest deleteCarMaintenanceRequest){return carMaintenanceService.delete(deleteCarMaintenanceRequest);}
     @GetMapping("/getByCarId")

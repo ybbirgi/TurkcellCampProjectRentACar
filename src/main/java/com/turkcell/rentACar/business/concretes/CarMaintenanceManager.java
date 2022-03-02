@@ -47,7 +47,7 @@ public class CarMaintenanceManager implements CarMaintenanceService {
     }
 
     @Override
-    public Result update(int id,UpdateCarMaintenanceRequest updateCarMaintenanceRequest) {
+    public Result update(UpdateCarMaintenanceRequest updateCarMaintenanceRequest) {
         CarMaintenance carMaintenance =this.modelMapperService.forRequest().map(updateCarMaintenanceRequest,CarMaintenance.class);
         this.carMaintenanceDao.save(carMaintenance);
         return new SuccessResult("Car Maintenance Updated Successfully");

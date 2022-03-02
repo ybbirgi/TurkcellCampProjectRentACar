@@ -14,7 +14,7 @@ import java.util.List;
 public interface CarMaintenanceService {
     DataResult<List<CarMaintenanceListDto>> getAll();
     Result add(CreateCarMaintenanceRequest createCarMaintenanceRequest);
-    Result update(int id,UpdateCarMaintenanceRequest updateCarMaintenanceRequest);
+    Result update(UpdateCarMaintenanceRequest updateCarMaintenanceRequest);
     Result delete(DeleteCarMaintenanceRequest deleteCarMaintenanceRequest);
     DataResult<List<CarMaintenanceListDto>> getByCarId(int id);
 }
