@@ -1,7 +1,6 @@
 package com.turkcell.rentACar.business.concretes;
 
 import com.turkcell.rentACar.business.abstracts.ColorService;
-import com.turkcell.rentACar.business.dtos.BrandListDto;
 import com.turkcell.rentACar.business.dtos.ColorDto;
 import com.turkcell.rentACar.business.dtos.ColorListDto;
 import com.turkcell.rentACar.business.requests.creates.CreateColorRequest;
@@ -12,7 +11,6 @@ import com.turkcell.rentACar.core.utilities.mapping.ModelMapperManager;
 import com.turkcell.rentACar.core.utilities.results.*;
 import com.turkcell.rentACar.dataAccess.abstracts.CarDao;
 import com.turkcell.rentACar.dataAccess.abstracts.ColorDao;
-import com.turkcell.rentACar.entities.concretes.Car;
 import com.turkcell.rentACar.entities.concretes.Color;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -64,7 +62,7 @@ public class ColorManager implements ColorService {
     @Override
     public Result update(UpdateColorRequest updateColorRequest) throws BusinessException{
         if(this.colorDao.getAllByColorId(updateColorRequest.getColorId()).stream().count()==0)
-            return new ErrorResult("Brand Does Not Exist");
+            return new ErrorResult("Color Does Not Exist");
         Color color = colorDao.getById(updateColorRequest.getColorId());
         checkIfSameColor(color);
         color = this.modelMapperService.forRequest().map(updateColorRequest,Color.class);

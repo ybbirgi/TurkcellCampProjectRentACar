@@ -1,4 +1,4 @@
-package com.turkcell.rentACar.business.requests.creates;
+package com.turkcell.rentACar.business.requests.deletes;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -6,14 +6,14 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.Positive;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateColorRequest {
+public class DeleteCarMaintenanceRequest {
     @NotNull
     @NotBlank
-    @Size(min=2,max=15)
-    private String colorName;
+    @Positive
+    private int maintenanceId;
 }

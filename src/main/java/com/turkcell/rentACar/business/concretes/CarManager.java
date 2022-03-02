@@ -50,7 +50,7 @@ public class CarManager implements CarService {
 
     @Override
     public Result add(CreateCarRequest createCarRequest) throws BusinessException {
-        checkIfColorAndBrandIsAvailable(createCarRequest.getColorId(),createCarRequest.getBrandId());
+        //checkIfColorAndBrandIsAvailable(createCarRequest.getColorId(),createCarRequest.getBrandId());
         Car car = this.modelMapperService.forRequest().map(createCarRequest,Car.class);
         this.carDao.save(car);
         return new SuccessResult("Car Added Successfully");
@@ -58,7 +58,7 @@ public class CarManager implements CarService {
 
     @Override
     public Result update(UpdateCarRequest updateCarRequest) throws BusinessException{
-        checkIfColorAndBrandIsAvailable(updateCarRequest.getColorId(),updateCarRequest.getBrandId());
+        //checkIfColorAndBrandIsAvailable(updateCarRequest.getColorId(),updateCarRequest.getBrandId());
         if(this.carDao.getAllByCarId(updateCarRequest.getCarId()).stream().count()==0)
             return new ErrorResult("Car Does Not Exist");
         Car car = carDao.getById(updateCarRequest.getCarId());
