@@ -9,6 +9,7 @@ import com.turkcell.rentACar.business.requests.updates.UpdateCarMaintenanceReque
 import com.turkcell.rentACar.core.utilities.results.DataResult;
 import com.turkcell.rentACar.core.utilities.results.Result;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface CarMaintenanceService {
@@ -17,4 +18,6 @@ public interface CarMaintenanceService {
     Result update(UpdateCarMaintenanceRequest updateCarMaintenanceRequest);
     Result delete(DeleteCarMaintenanceRequest deleteCarMaintenanceRequest);
     DataResult<List<CarMaintenanceListDto>> getByCarId(int id);
+    boolean checkIfCarIsInMaintenance(int id, LocalDate localDate);
+    boolean checkIfCarIsInMaintenance(int id,LocalDate startDate,LocalDate endDate);
 }

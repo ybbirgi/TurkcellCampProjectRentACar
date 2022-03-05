@@ -15,7 +15,6 @@ import javax.validation.constraints.Size;
 
 public class UpdateColorRequest {
 
-    @NotBlank
     @NotNull
     @PositiveOrZero
     private int colorId;

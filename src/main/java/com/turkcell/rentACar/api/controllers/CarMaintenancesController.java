@@ -5,6 +5,7 @@ import com.turkcell.rentACar.business.dtos.CarMaintenanceListDto;
 import com.turkcell.rentACar.business.requests.creates.CreateCarMaintenanceRequest;
 import com.turkcell.rentACar.business.requests.deletes.DeleteCarMaintenanceRequest;
 import com.turkcell.rentACar.business.requests.updates.UpdateCarMaintenanceRequest;
+import com.turkcell.rentACar.core.utilities.exceptions.BusinessException;
 import com.turkcell.rentACar.core.utilities.results.DataResult;
 import com.turkcell.rentACar.core.utilities.results.Result;
 import org.springframework.web.bind.annotation.*;

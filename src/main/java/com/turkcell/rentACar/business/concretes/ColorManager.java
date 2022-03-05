@@ -23,14 +23,11 @@ public class ColorManager implements ColorService {
 
     private ColorDao colorDao;
     private ModelMapperManager modelMapperService;
-    private CarDao carDao;
 
     @Autowired
-    public ColorManager(ColorDao colorDao,ModelMapperManager modelMapperService,CarDao carDao) {
-
+    public ColorManager(ColorDao colorDao,ModelMapperManager modelMapperService) {
         this.colorDao = colorDao;
         this.modelMapperService = modelMapperService;
-        this.carDao = carDao;
     }
 
     @Override
@@ -75,7 +72,6 @@ public class ColorManager implements ColorService {
         if(this.colorDao.getAllByColorId(deleteColorRequest.getColorId()).stream().count()==0)
             return new ErrorResult("Brand Does Not Exist");
         Color color = this.modelMapperService.forRequest().map(deleteColorRequest,Color.class);
-        checkIfColorUsedOnCar(color);
         this.colorDao.delete(color);
         return new SuccessResult("Color Deleted Succesfully");
     }
@@ -83,10 +79,5 @@ public class ColorManager implements ColorService {
     void checkIfSameColor(Color color) throws BusinessException {
         if(this.colorDao.getAllByColorName(color.getColorName()).stream().count()!=0)
             throw new BusinessException("This brand already exists");
-    }
-
-    void checkIfColorUsedOnCar(Color color) throws BusinessException{
-        if(this.carDao.getAllByColor_ColorId(color.getColorId()).stream().count()!=0)
-            throw new BusinessException("This Color Used on Cars ,You Can not Delete This Color");
     }
 }

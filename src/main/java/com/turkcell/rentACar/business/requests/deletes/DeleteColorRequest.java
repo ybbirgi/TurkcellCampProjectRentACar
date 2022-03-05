@@ -13,7 +13,6 @@ import javax.validation.constraints.Positive;
 @NoArgsConstructor
 public class DeleteColorRequest {
     @NotNull
-    @NotBlank
     @Positive
     private int colorId;
 }

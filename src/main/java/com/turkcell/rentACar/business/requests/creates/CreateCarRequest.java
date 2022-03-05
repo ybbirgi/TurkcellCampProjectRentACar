@@ -14,14 +14,12 @@ import javax.validation.constraints.*;
 
 public class CreateCarRequest {
 
-    @NotBlank
     @NotNull
     @Min(50)
     @Max(500)
     private double carDailyPrice;
 
     @NotNull
-    @NotBlank
     @Min(2000)
     @Max(2021)
     private int carModelYear;
@@ -29,12 +27,10 @@ public class CreateCarRequest {
     @Size(min=20,max=200)
     private String carDescription;
 
-    @NotBlank
     @NotNull
     @PositiveOrZero
     private int colorId;
 
-    @NotBlank
     @NotNull
     @PositiveOrZero
     private int brandId;

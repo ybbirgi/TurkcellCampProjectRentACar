@@ -1,5 +1,7 @@
 package com.turkcell.rentACar.business.concretes;
 
+import com.turkcell.rentACar.business.abstracts.CarMaintenanceService;
+import com.turkcell.rentACar.business.abstracts.CarRentalService;
 import com.turkcell.rentACar.business.abstracts.CarService;
 import com.turkcell.rentACar.business.dtos.CarListDto;
 import com.turkcell.rentACar.business.requests.creates.CreateCarRequest;
@@ -8,49 +10,50 @@ import com.turkcell.rentACar.business.requests.updates.UpdateCarRequest;
 import com.turkcell.rentACar.core.utilities.exceptions.BusinessException;
 import com.turkcell.rentACar.core.utilities.mapping.ModelMapperManager;
 import com.turkcell.rentACar.core.utilities.results.*;
-import com.turkcell.rentACar.dataAccess.abstracts.BrandDao;
 import com.turkcell.rentACar.dataAccess.abstracts.CarDao;
-import com.turkcell.rentACar.dataAccess.abstracts.ColorDao;
-import com.turkcell.rentACar.entities.concretes.Brand;
 import com.turkcell.rentACar.entities.concretes.Car;
-import com.turkcell.rentACar.entities.concretes.Color;
+import com.turkcell.rentACar.entities.concretes.CarRental;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class CarManager implements CarService {
     private CarDao carDao;
-    private BrandDao brandDao;
-    private ColorDao colorDao;
     private ModelMapperManager modelMapperService;
+    private CarRentalService carRentalService;
+    private CarMaintenanceService carMaintenanceService;
 
     @Autowired
-    public CarManager(CarDao carDao, ModelMapperManager modelMapperService , BrandDao brandDao , ColorDao colorDao) {
+    public CarManager(CarDao carDao, ModelMapperManager modelMapperService, @Lazy CarRentalService carRentalService, @Lazy CarMaintenanceService carMaintenanceService) {
         this.carDao = carDao;
-        this.brandDao = brandDao;
-        this.colorDao = colorDao;
         this.modelMapperService = modelMapperService;
+        this.carRentalService = carRentalService;
+        this.carMaintenanceService = carMaintenanceService;
     }
-
 
     @Override
     public DataResult<List<CarListDto>> getAll() {
         List<Car> result = this.carDao.findAll();
         if(result.isEmpty())
             return new ErrorDataResult<List<CarListDto>>(null,"Current List is Empty");
+        for (Car car:result) {
+            updateCarMaintenanceStatus(car.getCarId(),this.carMaintenanceService.checkIfCarIsInMaintenance(car.getCarId(), LocalDate.now()));
+            updateCarRentalStatus(car.getCarId(),this.carRentalService.checkIfCarIsRented(car.getCarId(),LocalDate.now()));
+        }
         List<CarListDto> response = result.stream().map(car->this.modelMapperService.forDto().map(car,CarListDto.class)).collect(Collectors.toList());
         return new SuccessDataResult<List<CarListDto>>(response,"Cars Listed succesfully");
     }
 
     @Override
     public Result add(CreateCarRequest createCarRequest) throws BusinessException {
-        //checkIfColorAndBrandIsAvailable(createCarRequest.getColorId(),createCarRequest.getBrandId());
         Car car = this.modelMapperService.forRequest().map(createCarRequest,Car.class);
         this.carDao.save(car);
         return new SuccessResult("Car Added Successfully");
@@ -58,7 +61,6 @@ public class CarManager implements CarService {
 
     @Override
     public Result update(UpdateCarRequest updateCarRequest) throws BusinessException{
-        //checkIfColorAndBrandIsAvailable(updateCarRequest.getColorId(),updateCarRequest.getBrandId());
         if(this.carDao.getAllByCarId(updateCarRequest.getCarId()).stream().count()==0)
             return new ErrorResult("Car Does Not Exist");
         Car car = carDao.getById(updateCarRequest.getCarId());
@@ -81,6 +83,8 @@ public class CarManager implements CarService {
         if(this.carDao.getAllByCarId(id).stream().count()==0)
             return new ErrorDataResult(null,"Car Does Not Exist");
         Car car = this.carDao.getById(id);
+        this.carMaintenanceService.checkIfCarIsInMaintenance(car.getCarId(), LocalDate.now());
+        this.carRentalService.checkIfCarIsRented(car.getCarId(),LocalDate.now());
         CarListDto carListDto = this.modelMapperService.forDto().map(car,CarListDto.class);
         return new SuccessDataResult<CarListDto>(carListDto,"Car Getted Succesfully");
     }
@@ -114,8 +118,18 @@ public class CarManager implements CarService {
         List<CarListDto> response = result.stream().map(car->this.modelMapperService.forDto().map(car,CarListDto.class)).collect(Collectors.toList());
         return new SuccessDataResult<List<CarListDto>>(response,"Cars Listed succesfully");
     }
-    void checkIfColorAndBrandIsAvailable(int colorId, int brandId) throws BusinessException{
-        if(this.colorDao.getByColorId(colorId)==null || this.brandDao.getByBrandId(brandId)==null)
-            throw new BusinessException("Color or Brand does not exist");
+
+    @Override
+    public void updateCarRentalStatus(int id,boolean status) {
+        Car car = this.carDao.getById(id);
+        car.setCarRentalStatus(status);
+        carDao.save(car);
+    }
+
+    @Override
+    public void updateCarMaintenanceStatus(int id,boolean status) {
+        Car car = this.carDao.getById(id);
+        car.setCarMaintenanceStatus(status);
+        carDao.save(car);
     }
 }

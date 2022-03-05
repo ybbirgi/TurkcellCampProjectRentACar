@@ -14,7 +14,6 @@ import javax.validation.constraints.Positive;
 
 public class DeleteBrandRequest {
     @NotNull
-    @NotBlank
     @Positive
     private int brandId;
 }

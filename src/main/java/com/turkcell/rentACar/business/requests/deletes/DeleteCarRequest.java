@@ -13,7 +13,6 @@ import javax.validation.constraints.Positive;
 @NoArgsConstructor
 public class DeleteCarRequest {
     @NotNull
-    @NotBlank
     @Positive
     private int carId;
 }

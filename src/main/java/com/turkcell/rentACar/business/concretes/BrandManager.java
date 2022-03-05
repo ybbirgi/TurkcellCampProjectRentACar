@@ -23,20 +23,18 @@ import java.util.stream.Collectors;
 public class BrandManager implements BrandService {
     private BrandDao brandDao;
     private ModelMapperService modelMapperService;
-    private CarDao carDao;
     @Autowired
-    public BrandManager(BrandDao brandDao,ModelMapperService modelMapperService,CarDao carDao) {
+    public BrandManager(BrandDao brandDao,ModelMapperService modelMapperService) {
         this.brandDao = brandDao;
         this.modelMapperService = modelMapperService;
-        this.carDao = carDao;
     }
 
     @Override
     public DataResult<List<BrandListDto>> getAll() {
         List<Brand> result=this.brandDao.findAll();
+        List<BrandListDto> response = result.stream().map(brand->this.modelMapperService.forDto().map(brand,BrandListDto.class)).collect(Collectors.toList());
         if(result.isEmpty())
             return new ErrorDataResult<List<BrandListDto>>(null,"Current List is Empty");
-        List<BrandListDto> response = result.stream().map(brand->this.modelMapperService.forDto().map(brand,BrandListDto.class)).collect(Collectors.toList());
         return new SuccessDataResult<List<BrandListDto>>(response,"Brands Listed Successfully");
     }
 
@@ -73,7 +71,6 @@ public class BrandManager implements BrandService {
         if(this.brandDao.getAllByBrandId(deleteBrandRequest.getBrandId()).stream().count()==0)
             return new ErrorResult("Brand Does Not Exist");
         Brand brand = this.modelMapperService.forRequest().map(deleteBrandRequest,Brand.class);
-        checkIfBrandUsedOnCar(brand);
         this.brandDao.delete(brand);
         return new SuccessResult("Brand Deleted Successfully");
     }
@@ -84,8 +81,4 @@ public class BrandManager implements BrandService {
             throw new BusinessException("This brand already exists");
     }
 
-    void checkIfBrandUsedOnCar(Brand brand) throws BusinessException{
-        if(this.carDao.getAllByBrand_BrandId(brand.getBrandId()).stream().count()!=0)
-            throw new BusinessException("This Brand Used on Cars ,You Can not Delete This Brand");
-    }
 }

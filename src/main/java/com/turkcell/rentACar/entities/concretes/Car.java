@@ -27,6 +27,12 @@ public class Car {
     @Column(name= "car_description")
     private String carDescription;
 
+    @Column(name= "car_rental_status")
+    private boolean carRentalStatus;
+
+    @Column(name= "car_maintenance_status")
+    private boolean carMaintenanceStatus;
+
     @ManyToOne
     @JoinColumn(name = "brand_id")
     private Brand brand;
@@ -36,5 +42,8 @@ public class Car {
     private Color color;
 
     @OneToMany(mappedBy = "car")
-    private List<CarMaintenance> carMaintenance;
+    private List<CarMaintenance> carMaintenances;
+
+    @OneToMany(mappedBy = "car")
+    private List<CarRental> carRentals;
 }

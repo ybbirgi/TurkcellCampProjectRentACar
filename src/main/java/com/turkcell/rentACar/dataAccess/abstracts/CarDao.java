@@ -11,6 +11,4 @@ import java.util.List;
 public interface CarDao extends JpaRepository <Car,Integer>  {
     List<Car> getAllByCarId(Integer id);
     List<Car> getByCarDailyPriceLessThanEqual(Double carDailyPrice, Sort sort);
-    List<Car> getAllByColor_ColorId(Integer colorId);
-    List<Car> getAllByBrand_BrandId(Integer colorId);
 }

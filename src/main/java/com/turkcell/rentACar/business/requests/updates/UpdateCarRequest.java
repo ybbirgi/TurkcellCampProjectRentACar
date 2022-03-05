@@ -11,18 +11,15 @@ import javax.validation.constraints.*;
 @NoArgsConstructor
 public class UpdateCarRequest {
     @NotNull
-    @NotBlank
     @Positive
     private int carId;
 
-    @NotBlank
     @NotNull
     @Min(50)
     @Max(500)
     private double carDailyPrice;
 
     @NotNull
-    @NotBlank
     @Min(2000)
     @Max(2021)
     private int carModelYear;
@@ -30,12 +27,10 @@ public class UpdateCarRequest {
     @Size(min=20,max=200)
     private String carDescription;
 
-    @NotBlank
     @NotNull
     @PositiveOrZero
     private int colorId;
 
-    @NotBlank
     @NotNull
     @PositiveOrZero
     private int brandId;
