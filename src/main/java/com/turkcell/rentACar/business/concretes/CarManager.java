@@ -83,8 +83,8 @@ public class CarManager implements CarService {
         if(this.carDao.getAllByCarId(id).stream().count()==0)
             return new ErrorDataResult(null,"Car Does Not Exist");
         Car car = this.carDao.getById(id);
-        this.carMaintenanceService.checkIfCarIsInMaintenance(car.getCarId(), LocalDate.now());
-        this.carRentalService.checkIfCarIsRented(car.getCarId(),LocalDate.now());
+        updateCarMaintenanceStatus(car.getCarId(),this.carMaintenanceService.checkIfCarIsInMaintenance(car.getCarId(), LocalDate.now()));
+        updateCarRentalStatus(car.getCarId(),this.carRentalService.checkIfCarIsRented(car.getCarId(),LocalDate.now()));
         CarListDto carListDto = this.modelMapperService.forDto().map(car,CarListDto.class);
         return new SuccessDataResult<CarListDto>(carListDto,"Car Getted Succesfully");
     }
@@ -105,6 +105,10 @@ public class CarManager implements CarService {
         List<Car> result = this.carDao.findAll();
         if(result.isEmpty())
             return new ErrorDataResult<List<CarListDto>>(null,"Cars Could Not Listed");
+        for(Car car : result){
+            updateCarMaintenanceStatus(car.getCarId(),this.carMaintenanceService.checkIfCarIsInMaintenance(car.getCarId(), LocalDate.now()));
+            updateCarRentalStatus(car.getCarId(),this.carRentalService.checkIfCarIsRented(car.getCarId(),LocalDate.now()));
+        }
         List<CarListDto> response = result.stream().map(car->this.modelMapperService.forDto().map(car,CarListDto.class)).collect(Collectors.toList());
         return new SuccessDataResult<List<CarListDto>>(response,"Cars Listed succesfully");
     }
@@ -115,6 +119,10 @@ public class CarManager implements CarService {
         List<Car> result =this.carDao.findAll(sort);
         if(result.isEmpty())
             return new ErrorDataResult<List<CarListDto>>(null,"Cars Could Not Listed");
+        for(Car car : result){
+            updateCarMaintenanceStatus(car.getCarId(),this.carMaintenanceService.checkIfCarIsInMaintenance(car.getCarId(), LocalDate.now()));
+            updateCarRentalStatus(car.getCarId(),this.carRentalService.checkIfCarIsRented(car.getCarId(),LocalDate.now()));
+        }
         List<CarListDto> response = result.stream().map(car->this.modelMapperService.forDto().map(car,CarListDto.class)).collect(Collectors.toList());
         return new SuccessDataResult<List<CarListDto>>(response,"Cars Listed succesfully");
     }
