@@ -9,7 +9,6 @@ import com.turkcell.rentACar.business.requests.updates.UpdateColorRequest;
 import com.turkcell.rentACar.core.utilities.exceptions.BusinessException;
 import com.turkcell.rentACar.core.utilities.mapping.ModelMapperManager;
 import com.turkcell.rentACar.core.utilities.results.*;
-import com.turkcell.rentACar.dataAccess.abstracts.CarDao;
 import com.turkcell.rentACar.dataAccess.abstracts.ColorDao;
 import com.turkcell.rentACar.entities.concretes.Color;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,15 +41,14 @@ public class ColorManager implements ColorService {
     @Override
     public Result add(CreateColorRequest createColorRequest) throws BusinessException {
         Color color = this.modelMapperService.forRequest().map(createColorRequest,Color.class);
-        checkIfSameColor(color);
+        checkIfSameColor(color.getColorName());
         this.colorDao.save(color);
         return new SuccessResult("Color Added Successfully");
     }
 
     @Override
-    public DataResult<ColorDto> getById(int id) {
-        if(this.colorDao.getAllByColorId(id).stream().count()==0)
-            return new ErrorDataResult(null,"Color Does Not Exist");
+    public DataResult<ColorDto> getById(int id) throws BusinessException{
+        checkIfColorExists(id);
         Color color = colorDao.getById(id);
         ColorDto colorDto = this.modelMapperService.forDto().map(color,ColorDto.class);
         return new SuccessDataResult<ColorDto>(colorDto,"Color Listed Successfully");
@@ -58,10 +56,9 @@ public class ColorManager implements ColorService {
 
     @Override
     public Result update(UpdateColorRequest updateColorRequest) throws BusinessException{
-        if(this.colorDao.getAllByColorId(updateColorRequest.getColorId()).stream().count()==0)
-            return new ErrorResult("Color Does Not Exist");
+        checkIfColorExists(updateColorRequest.getColorId());
         Color color = colorDao.getById(updateColorRequest.getColorId());
-        checkIfSameColor(color);
+        checkIfSameColor(color.getColorName());
         color = this.modelMapperService.forRequest().map(updateColorRequest,Color.class);
         this.colorDao.save(color);
         return new SuccessResult("Color Updated Succesfully");
@@ -69,15 +66,18 @@ public class ColorManager implements ColorService {
 
     @Override
     public Result delete(DeleteColorRequest deleteColorRequest) throws BusinessException{
-        if(this.colorDao.getAllByColorId(deleteColorRequest.getColorId()).stream().count()==0)
-            return new ErrorResult("Brand Does Not Exist");
+        checkIfColorExists(deleteColorRequest.getColorId());
         Color color = this.modelMapperService.forRequest().map(deleteColorRequest,Color.class);
         this.colorDao.delete(color);
         return new SuccessResult("Color Deleted Succesfully");
     }
+    void checkIfColorExists(int id) throws BusinessException {
+        if(!this.colorDao.existsById(id))
+            throw new BusinessException("There is not any Color with This Id");
+    }
 
-    void checkIfSameColor(Color color) throws BusinessException {
-        if(this.colorDao.getAllByColorName(color.getColorName()).stream().count()!=0)
+    void checkIfSameColor(String name) throws BusinessException {
+        if(this.colorDao.existsByName(name))
             throw new BusinessException("This brand already exists");
     }
 }

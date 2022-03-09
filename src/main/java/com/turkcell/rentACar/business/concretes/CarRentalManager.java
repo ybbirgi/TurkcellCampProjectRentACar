@@ -7,6 +7,7 @@ import com.turkcell.rentACar.business.dtos.CarRentalListDto;
 import com.turkcell.rentACar.business.requests.creates.CreateCarRentalRequest;
 import com.turkcell.rentACar.business.requests.deletes.DeleteCarRentalRequest;
 import com.turkcell.rentACar.business.requests.updates.UpdateCarRentalRequest;
+import com.turkcell.rentACar.core.utilities.exceptions.BusinessException;
 import com.turkcell.rentACar.core.utilities.mapping.ModelMapperService;
 import com.turkcell.rentACar.core.utilities.results.*;
 import com.turkcell.rentACar.dataAccess.abstracts.CarRentalDao;
@@ -35,14 +36,12 @@ public class CarRentalManager implements CarRentalService {
     @Override
     public DataResult<List<CarRentalListDto>> getAll() {
         List<CarRental> carRentals = this.carRentalDao.findAll();
-        if(carRentals.isEmpty())
-                return new ErrorDataResult<List<CarRentalListDto>>(null,"Current List is Empty");
         List<CarRentalListDto> response = carRentals.stream().map(carRental->this.modelMapperService.forDto().map(carRental, CarRentalListDto.class)).collect(Collectors.toList());
         return new SuccessDataResult<List<CarRentalListDto>>(response,"CarRentals Listed Successfully");
     }
 
     @Override
-    public Result add(CreateCarRentalRequest createCarRentalRequest){
+    public Result add(CreateCarRentalRequest createCarRentalRequest) throws BusinessException {
         CarRental carRental = this.modelMapperService.forRequest().map(createCarRentalRequest,CarRental.class);
         carRental.setRentalId(0);
         this.carService.updateCarMaintenanceStatus(createCarRentalRequest.getCarId(),
@@ -82,18 +81,14 @@ public class CarRentalManager implements CarRentalService {
     @Override
     public boolean checkIfCarIsRented(int id, LocalDate localDate){
         List<CarRental> result=this.carRentalDao.getAllByCar_CarId(id);
-        int flag=0;
         for (CarRental carRental : result) {
             if(carRental.getRentalReturnDate()==null ||
                     localDate.isBefore(carRental.getRentalReturnDate()) &&
                     localDate.isAfter(carRental.getRentalDate()) ||
                     localDate.isEqual(carRental.getRentalReturnDate()) &&
                     localDate.isEqual(carRental.getRentalDate()))
-                flag++;
+                return true;
         }
-        if(flag!=0)
-            return true;
-        else
-            return false;
+        return false;
     }
 }

@@ -5,6 +5,7 @@ import com.turkcell.rentACar.business.dtos.CarRentalListDto;
 import com.turkcell.rentACar.business.requests.creates.CreateCarRentalRequest;
 import com.turkcell.rentACar.business.requests.deletes.DeleteCarRentalRequest;
 import com.turkcell.rentACar.business.requests.updates.UpdateCarRentalRequest;
+import com.turkcell.rentACar.core.utilities.exceptions.BusinessException;
 import com.turkcell.rentACar.core.utilities.results.DataResult;
 import com.turkcell.rentACar.core.utilities.results.Result;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +25,7 @@ public class CarRentalsController {
     @GetMapping("/getAll")
     DataResult<List<CarRentalListDto>> getAll(){return carRentalService.getAll();}
     @PostMapping("/add")
-    Result add(@RequestBody CreateCarRentalRequest createCarRentalRequest){return carRentalService.add(createCarRentalRequest);}
+    Result add(@RequestBody CreateCarRentalRequest createCarRentalRequest)throws BusinessException {return carRentalService.add(createCarRentalRequest);}
     @PutMapping("/update")
     Result update(@RequestBody UpdateCarRentalRequest updateCarRentalRequest){return carRentalService.update(updateCarRentalRequest);}
     @DeleteMapping("/delete")

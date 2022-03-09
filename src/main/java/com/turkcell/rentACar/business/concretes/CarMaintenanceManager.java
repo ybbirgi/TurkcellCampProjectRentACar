@@ -7,6 +7,7 @@ import com.turkcell.rentACar.business.dtos.CarMaintenanceListDto;
 import com.turkcell.rentACar.business.requests.creates.CreateCarMaintenanceRequest;
 import com.turkcell.rentACar.business.requests.deletes.DeleteCarMaintenanceRequest;
 import com.turkcell.rentACar.business.requests.updates.UpdateCarMaintenanceRequest;
+import com.turkcell.rentACar.core.utilities.exceptions.BusinessException;
 import com.turkcell.rentACar.core.utilities.mapping.ModelMapperService;
 import com.turkcell.rentACar.core.utilities.results.*;
 import com.turkcell.rentACar.dataAccess.abstracts.CarMaintenanceDao;
@@ -37,20 +38,17 @@ public class CarMaintenanceManager implements CarMaintenanceService {
     @Override
     public DataResult<List<CarMaintenanceListDto>> getAll() {
         List<CarMaintenance> result=this.carMaintenanceDao.findAll();
-        if(result.isEmpty())
-            return new ErrorDataResult<List<CarMaintenanceListDto>>(null,"Current List is Empty");
         List<CarMaintenanceListDto> response = result.stream().map(carMaintenance->this.modelMapperService.forDto().
                 map(carMaintenance,CarMaintenanceListDto.class)).collect(Collectors.toList());
         return new SuccessDataResult<List<CarMaintenanceListDto>>(response,"Car Maintenances Listed Successfully");
     }
 
     @Override
-    public Result add(CreateCarMaintenanceRequest createCarMaintenanceRequest){
+    public Result add(CreateCarMaintenanceRequest createCarMaintenanceRequest) throws BusinessException {
         CarMaintenance carMaintenance =this.modelMapperService.forRequest().map(createCarMaintenanceRequest,CarMaintenance.class);
         carMaintenance.setMaintenanceId(0);
         this.carService.updateCarRentalStatus(createCarMaintenanceRequest.getCarId(),
                 this.carRentalService.checkIfCarIsRented(createCarMaintenanceRequest.getCarId(),createCarMaintenanceRequest.getReturnDate()));
-        System.out.println("Car Rental Status:"+ carService.getById(createCarMaintenanceRequest.getCarId()).getData().isCarRentalStatus());
         if(this.carService.getById(createCarMaintenanceRequest.getCarId()).getData().isCarRentalStatus())
             return new ErrorResult("Car is Rented , Can't Go Under Maintenance");
         this.carMaintenanceDao.save(carMaintenance);
@@ -80,40 +78,33 @@ public class CarMaintenanceManager implements CarMaintenanceService {
         List<CarMaintenanceListDto> response = carMaintenanceList.stream().map(carMaintenance->this.modelMapperService.forDto().map(carMaintenance,CarMaintenanceListDto.class)).collect(Collectors.toList());
         return new SuccessDataResult<List<CarMaintenanceListDto>>(response,"Car Maintenances Listed Successfully");
     }
+
     //local date = rental date
     @Override
     public boolean checkIfCarIsInMaintenance(int id,LocalDate localDate){
         List<CarMaintenance> result=this.carMaintenanceDao.getAllByCar_CarId(id);
-        int flag=0;
         for (CarMaintenance carMaintenance : result) {
             if((carMaintenance.getReturnDate()==null)||
                     localDate.now().isBefore(carMaintenance.getReturnDate()) ||
                         localDate.now().isEqual(carMaintenance.getReturnDate())) {
-                flag++;
+                return true;
             }
         }
-        if(flag!=0)
-            return true;
-        else
-            return false;
+        return false;
     }
 
     @Override
     public boolean checkIfCarIsInMaintenance(int id, LocalDate startDate, LocalDate endDate) {
         List<CarMaintenance> result=this.carMaintenanceDao.getAllByCar_CarId(id);
-        int flag=0;
         for (CarMaintenance carMaintenance : result) {
             if((carMaintenance.getReturnDate()==null)||
                     startDate.now().isAfter(carMaintenance.getReturnDate()) &&
                             endDate.now().isBefore(carMaintenance.getReturnDate())||
                     startDate.now().isEqual(carMaintenance.getReturnDate()) &&
                             endDate.now().isEqual(carMaintenance.getReturnDate())) {
-                flag++;
+                return true;
             }
         }
-        if(flag!=0)
-            return true;
-        else
-            return false;
+        return false;
     }
 }

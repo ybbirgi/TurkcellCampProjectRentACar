@@ -27,7 +27,7 @@ public class ColorsController {
         return this.colorService.getAll();
     }
     @GetMapping("/getById")
-    public DataResult<ColorDto> getById(@RequestParam int id){return this.colorService.getById(id);}
+    public DataResult<ColorDto> getById(@RequestParam int id) throws BusinessException{return this.colorService.getById(id);}
     @PostMapping("/add")
     public Result add(@RequestBody CreateColorRequest createColorRequest) throws BusinessException {
         return this.colorService.add(createColorRequest);

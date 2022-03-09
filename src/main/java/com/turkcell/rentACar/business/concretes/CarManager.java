@@ -61,28 +61,25 @@ public class CarManager implements CarService {
 
     @Override
     public Result update(UpdateCarRequest updateCarRequest) throws BusinessException{
-        if(this.carDao.getAllByCarId(updateCarRequest.getCarId()).stream().count()==0)
-            return new ErrorResult("Car Does Not Exist");
-        Car car = carDao.getById(updateCarRequest.getCarId());
-        car = this.modelMapperService.forRequest().map(updateCarRequest,Car.class);
+        checkIfCarExists(updateCarRequest.getCarId());
+        Car car = this.modelMapperService.forRequest().map(updateCarRequest,Car.class);
+        checkIfSameCar(car.getBrand().getBrandName(),car.getColor().getColorName());
         this.carDao.save(car);
         return new SuccessResult("Car Updated Successfully");
     }
 
     @Override
-    public Result delete(DeleteCarRequest deleteCarRequest) {
-        if(this.carDao.getAllByCarId(deleteCarRequest.getCarId()).stream().count()==0)
-            return new ErrorResult("Car Does Not Exist");
+    public Result delete(DeleteCarRequest deleteCarRequest) throws BusinessException{
+        checkIfCarExists(deleteCarRequest.getCarId());
         Car car = this.modelMapperService.forRequest().map(deleteCarRequest,Car.class);
         this.carDao.delete(car);
-        return new SuccessResult("Car Deleted Succesfully");
+        return new SuccessResult("Car Deleted Successfully");
     }
 
     @Override
-    public DataResult<CarListDto> getById(int id) {
-        if(this.carDao.getAllByCarId(id).stream().count()==0)
-            return new ErrorDataResult(null,"Car Does Not Exist");
+    public DataResult<CarListDto> getById(int id) throws BusinessException{
         Car car = this.carDao.getById(id);
+        checkIfCarExists(id);
         updateCarMaintenanceStatus(car.getCarId(),this.carMaintenanceService.checkIfCarIsInMaintenance(car.getCarId(), LocalDate.now()));
         updateCarRentalStatus(car.getCarId(),this.carRentalService.checkIfCarIsRented(car.getCarId(),LocalDate.now()));
         CarListDto carListDto = this.modelMapperService.forDto().map(car,CarListDto.class);
@@ -93,8 +90,6 @@ public class CarManager implements CarService {
     public DataResult<List<CarListDto>> getByCarDailyPriceLessThanOrEqual(Double carDailyPrice) {
         Sort sort = Sort.by(Sort.Direction.DESC,"carDailyPrice");
         List<Car> result = this.carDao.getByCarDailyPriceLessThanEqual(carDailyPrice,sort);
-        if(result.isEmpty())
-            return new ErrorDataResult<List<CarListDto>>(null,"No Car Found Below Daily Price");
         List<CarListDto> response = result.stream().map(car->this.modelMapperService.forDto().map(car,CarListDto.class)).collect(Collectors.toList());
         return new SuccessDataResult<List<CarListDto>>(response,"Cars Listed succesfully");
     }
@@ -103,8 +98,6 @@ public class CarManager implements CarService {
     public DataResult<List<CarListDto>> getAllPaged(int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo,pageSize);
         List<Car> result = this.carDao.findAll();
-        if(result.isEmpty())
-            return new ErrorDataResult<List<CarListDto>>(null,"Cars Could Not Listed");
         for(Car car : result){
             updateCarMaintenanceStatus(car.getCarId(),this.carMaintenanceService.checkIfCarIsInMaintenance(car.getCarId(), LocalDate.now()));
             updateCarRentalStatus(car.getCarId(),this.carRentalService.checkIfCarIsRented(car.getCarId(),LocalDate.now()));
@@ -117,8 +110,6 @@ public class CarManager implements CarService {
     public DataResult<List<CarListDto>> getAllSorted(Sort.Direction direction) {
         Sort sort = Sort.by(direction,"carDailyPrice");
         List<Car> result =this.carDao.findAll(sort);
-        if(result.isEmpty())
-            return new ErrorDataResult<List<CarListDto>>(null,"Cars Could Not Listed");
         for(Car car : result){
             updateCarMaintenanceStatus(car.getCarId(),this.carMaintenanceService.checkIfCarIsInMaintenance(car.getCarId(), LocalDate.now()));
             updateCarRentalStatus(car.getCarId(),this.carRentalService.checkIfCarIsRented(car.getCarId(),LocalDate.now()));
@@ -139,5 +130,13 @@ public class CarManager implements CarService {
         Car car = this.carDao.getById(id);
         car.setCarMaintenanceStatus(status);
         carDao.save(car);
+    }
+    void checkIfCarExists(int id) throws BusinessException{
+        if(!this.carDao.existsById(id))
+            throw new BusinessException("There is not any Car with This Id");
+    }
+    void checkIfSameCar(String brandName,String colorName) throws BusinessException{
+        if(!this.carDao.existsByBrand_BrandName(brandName) && !this.carDao.existsByBrand_ColorName(colorName))
+            throw new BusinessException("There is not any Car with This Id");
     }
 }

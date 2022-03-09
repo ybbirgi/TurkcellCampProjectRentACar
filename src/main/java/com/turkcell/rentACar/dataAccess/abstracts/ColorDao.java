@@ -8,6 +8,7 @@ import java.util.List;
 
 @Repository
 public interface ColorDao extends JpaRepository<Color,Integer> {
+    boolean existsByName(String name);
     List<Color> getAllByColorId(Integer id);
     List<Color> getAllByColorName(String name);
 }

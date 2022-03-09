@@ -33,23 +33,21 @@ public class BrandManager implements BrandService {
     public DataResult<List<BrandListDto>> getAll() {
         List<Brand> result=this.brandDao.findAll();
         List<BrandListDto> response = result.stream().map(brand->this.modelMapperService.forDto().map(brand,BrandListDto.class)).collect(Collectors.toList());
-        if(result.isEmpty())
-            return new ErrorDataResult<List<BrandListDto>>(null,"Current List is Empty");
         return new SuccessDataResult<List<BrandListDto>>(response,"Brands Listed Successfully");
     }
 
     @Override
     public Result add(CreateBrandRequest createBrandRequest) throws BusinessException {
         Brand brand = this.modelMapperService.forRequest().map(createBrandRequest,Brand.class);
-        checkIfSameBrand(brand);
+        checkIfSameBrand(brand.getBrandName());
         this.brandDao.save(brand);
         return new SuccessResult("Brand Added Successfully");
     }
 
     @Override
-    public DataResult<BrandDto> getById(int id) {
-        if(this.brandDao.getAllByBrandId(id).stream().count()==0)
-            return new ErrorDataResult(null,"Car Does Not Exist");
+    public DataResult<BrandDto> getById(int id) throws BusinessException{
+        checkIfBrandExists(id);
+
         Brand brand = brandDao.getById(id);
         BrandDto brandDto = this.modelMapperService.forDto().map(brand,BrandDto.class);
         return new SuccessDataResult<BrandDto>(brandDto,"Brand Listed Successfully");
@@ -57,27 +55,28 @@ public class BrandManager implements BrandService {
 
     @Override
     public Result update(UpdateBrandRequest updateBrandRequest) throws BusinessException {
-        if(this.brandDao.getAllByBrandId(updateBrandRequest.getBrandId()).stream().count()==0)
-            return new ErrorResult("Brand Does Not Exist");
-        Brand brand = this.brandDao.getById(updateBrandRequest.getBrandId());
-        brand = this.modelMapperService.forRequest().map(updateBrandRequest,Brand.class);
-        checkIfSameBrand(brand);
+        checkIfBrandExists(updateBrandRequest.getBrandId());
+
+        Brand brand = this.modelMapperService.forRequest().map(updateBrandRequest,Brand.class);
+        checkIfSameBrand(brand.getBrandName());
         this.brandDao.save(brand);
         return new SuccessResult("Brand Updated Successfully");
     }
 
     @Override
     public Result delete(DeleteBrandRequest deleteBrandRequest) throws BusinessException{
-        if(this.brandDao.getAllByBrandId(deleteBrandRequest.getBrandId()).stream().count()==0)
-            return new ErrorResult("Brand Does Not Exist");
+        checkIfBrandExists(deleteBrandRequest.getBrandId());
         Brand brand = this.modelMapperService.forRequest().map(deleteBrandRequest,Brand.class);
         this.brandDao.delete(brand);
         return new SuccessResult("Brand Deleted Successfully");
     }
+    void checkIfBrandExists(int id) throws BusinessException {
+        if(!this.brandDao.existsById(id))
+            throw new BusinessException("There is not any Brand with This Id");
+    }
 
-
-    void checkIfSameBrand(Brand brand) throws BusinessException {
-        if(this.brandDao.getAllByBrandName(brand.getBrandName()).stream().count()!=0)
+    void checkIfSameBrand(String name) throws BusinessException {
+        if(this.brandDao.existsByName(name))
             throw new BusinessException("This brand already exists");
     }
 
