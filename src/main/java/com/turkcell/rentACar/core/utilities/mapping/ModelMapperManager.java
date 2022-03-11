@@ -1,6 +1,7 @@
 package com.turkcell.rentACar.core.utilities.mapping;
 
 import org.modelmapper.ModelMapper;
+import org.modelmapper.config.Configuration;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.stereotype.Service;
 
@@ -24,4 +25,5 @@ public class ModelMapperManager implements ModelMapperService{
         this.modelMapper.getConfiguration().setAmbiguityIgnored(true).setMatchingStrategy(MatchingStrategies.STANDARD);
         return modelMapper;
     }
+
 }

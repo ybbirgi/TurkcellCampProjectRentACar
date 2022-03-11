@@ -3,10 +3,10 @@ package com.turkcell.rentACar.entities.concretes;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.util.Pair;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -32,4 +32,14 @@ public class CarRental {
     @JoinColumn(name="car_id")
     private Car car;
 
+    @ManyToOne
+    @JoinColumn(name="city_id")
+    private City returnCity;
+
+    @ManyToOne
+    @JoinColumn(name="customer_id")
+    private Customer customer;
+
+    @Column(name = "total_payment")
+    private Double totalPayment;
 }

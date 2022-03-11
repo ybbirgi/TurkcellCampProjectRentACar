@@ -1,15 +1,13 @@
-package com.turkcell.rentACar.business.dtos;
+package com.turkcell.rentACar.business.dtos.carDtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-
-public class CarListDto {
+public class CarDto {
     private double carDailyPrice;
     private int carModelYear;
     private String carDescription;

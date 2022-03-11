@@ -3,7 +3,7 @@ package com.turkcell.rentACar.business.concretes;
 import com.turkcell.rentACar.business.abstracts.CarMaintenanceService;
 import com.turkcell.rentACar.business.abstracts.CarRentalService;
 import com.turkcell.rentACar.business.abstracts.CarService;
-import com.turkcell.rentACar.business.dtos.CarMaintenanceListDto;
+import com.turkcell.rentACar.business.dtos.carMaintenanceDtos.CarMaintenanceListDto;
 import com.turkcell.rentACar.business.requests.creates.CreateCarMaintenanceRequest;
 import com.turkcell.rentACar.business.requests.deletes.DeleteCarMaintenanceRequest;
 import com.turkcell.rentACar.business.requests.updates.UpdateCarMaintenanceRequest;
@@ -44,7 +44,7 @@ public class CarMaintenanceManager implements CarMaintenanceService {
     }
 
     @Override
-    public Result add(CreateCarMaintenanceRequest createCarMaintenanceRequest) throws BusinessException {
+    public Result sendToMaintenance(CreateCarMaintenanceRequest createCarMaintenanceRequest) throws BusinessException {
         CarMaintenance carMaintenance =this.modelMapperService.forRequest().map(createCarMaintenanceRequest,CarMaintenance.class);
         carMaintenance.setMaintenanceId(0);
         this.carService.updateCarRentalStatus(createCarMaintenanceRequest.getCarId(),

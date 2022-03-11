@@ -1,8 +1,8 @@
 package com.turkcell.rentACar.business.concretes;
 
 import com.turkcell.rentACar.business.abstracts.BrandService;
-import com.turkcell.rentACar.business.dtos.BrandDto;
-import com.turkcell.rentACar.business.dtos.BrandListDto;
+import com.turkcell.rentACar.business.dtos.brandDtos.BrandDto;
+import com.turkcell.rentACar.business.dtos.brandDtos.BrandListDto;
 import com.turkcell.rentACar.business.requests.creates.CreateBrandRequest;
 import com.turkcell.rentACar.business.requests.deletes.DeleteBrandRequest;
 import com.turkcell.rentACar.business.requests.updates.UpdateBrandRequest;
@@ -10,9 +10,7 @@ import com.turkcell.rentACar.core.utilities.exceptions.BusinessException;
 import com.turkcell.rentACar.core.utilities.mapping.ModelMapperService;
 import com.turkcell.rentACar.core.utilities.results.*;
 import com.turkcell.rentACar.dataAccess.abstracts.BrandDao;
-import com.turkcell.rentACar.dataAccess.abstracts.CarDao;
 import com.turkcell.rentACar.entities.concretes.Brand;
-import com.turkcell.rentACar.entities.concretes.Color;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +46,7 @@ public class BrandManager implements BrandService {
     public DataResult<BrandDto> getById(int id) throws BusinessException{
         checkIfBrandExists(id);
 
-        Brand brand = brandDao.getById(id);
+        Brand brand = this.brandDao.getById(id);
         BrandDto brandDto = this.modelMapperService.forDto().map(brand,BrandDto.class);
         return new SuccessDataResult<BrandDto>(brandDto,"Brand Listed Successfully");
     }
@@ -76,7 +74,7 @@ public class BrandManager implements BrandService {
     }
 
     void checkIfSameBrand(String name) throws BusinessException {
-        if(this.brandDao.existsByName(name))
+        if(this.brandDao.existsByBrandName(name))
             throw new BusinessException("This brand already exists");
     }
 

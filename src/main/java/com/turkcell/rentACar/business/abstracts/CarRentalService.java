@@ -1,6 +1,6 @@
 package com.turkcell.rentACar.business.abstracts;
 
-import com.turkcell.rentACar.business.dtos.CarRentalListDto;
+import com.turkcell.rentACar.business.dtos.carRentalDtos.CarRentalListDto;
 import com.turkcell.rentACar.business.requests.creates.CreateCarRentalRequest;
 import com.turkcell.rentACar.business.requests.deletes.DeleteCarRentalRequest;
 import com.turkcell.rentACar.business.requests.updates.UpdateCarRentalRequest;
@@ -13,7 +13,7 @@ import java.util.List;
 
 public interface CarRentalService {
     DataResult<List<CarRentalListDto>> getAll();
-    Result add(CreateCarRentalRequest createCarRentalRequest) throws BusinessException;
+    Result rentCar(CreateCarRentalRequest createCarRentalRequest) throws BusinessException;
     Result update(UpdateCarRentalRequest updateCarRentalRequest);
     Result delete(DeleteCarRentalRequest deleteCarRentalRequest);
     DataResult<List<CarRentalListDto>> getByCarId(int id);

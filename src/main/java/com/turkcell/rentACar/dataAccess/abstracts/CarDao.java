@@ -10,7 +10,6 @@ import java.util.List;
 @Repository
 public interface CarDao extends JpaRepository <Car,Integer>  {
     boolean existsByBrand_BrandName(String name);
-    boolean existsByBrand_ColorName(String name);
-    List<Car> getAllByCarId(Integer id);
+    boolean existsByColor_ColorName(String name);
     List<Car> getByCarDailyPriceLessThanEqual(Double carDailyPrice, Sort sort);
 }

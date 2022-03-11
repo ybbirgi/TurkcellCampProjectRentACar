@@ -6,10 +6,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.util.Pair;
 
 import javax.persistence.Column;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 
 @Data
@@ -33,4 +30,12 @@ public class UpdateCarRentalRequest {
     @NotNull
     @Positive
     private int carId;
+
+    @NotNull
+    @Positive
+    private int cityId;
+
+    @NotNull
+    @PositiveOrZero
+    private int customerId;
 }

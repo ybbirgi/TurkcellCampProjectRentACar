@@ -11,16 +11,16 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "brands")
-public class Brand {
+@Table(name = "cities")
+public class City {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "brand_id")
-    private int brandId;
+    @Column(name = "city_id")
+    private int cityId;
 
-    @Column(name = "brand_name")
-    private String brandName;
+    @Column(name = "city_name")
+    private String cityName;
 
-    @OneToMany(mappedBy = "brand", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Car> cars;
+    @OneToMany(mappedBy = "currentCity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Car> carList;
 }

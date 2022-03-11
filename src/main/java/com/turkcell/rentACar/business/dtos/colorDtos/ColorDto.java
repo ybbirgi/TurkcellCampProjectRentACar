@@ -1,4 +1,4 @@
-package com.turkcell.rentACar.business.dtos;
+package com.turkcell.rentACar.business.dtos.colorDtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -41,9 +41,13 @@ public class Car {
     @JoinColumn(name = "color_id")
     private Color color;
 
-    @OneToMany(mappedBy = "car")
+    @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<CarMaintenance> carMaintenances;
 
-    @OneToMany(mappedBy = "car")
+    @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<CarRental> carRentals;
+
+    @ManyToOne
+    @JoinColumn(name = "city_id")
+    private City currentCity;
 }

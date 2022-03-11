@@ -1,7 +1,7 @@
 package com.turkcell.rentACar.api.controllers;
 
 import com.turkcell.rentACar.business.abstracts.CarMaintenanceService;
-import com.turkcell.rentACar.business.dtos.CarMaintenanceListDto;
+import com.turkcell.rentACar.business.dtos.carMaintenanceDtos.CarMaintenanceListDto;
 import com.turkcell.rentACar.business.requests.creates.CreateCarMaintenanceRequest;
 import com.turkcell.rentACar.business.requests.deletes.DeleteCarMaintenanceRequest;
 import com.turkcell.rentACar.business.requests.updates.UpdateCarMaintenanceRequest;
@@ -22,7 +22,7 @@ public class CarMaintenancesController {
     @GetMapping("/getAll")
     DataResult<List<CarMaintenanceListDto>> getAll(){return carMaintenanceService.getAll();}
     @PostMapping("/add")
-    Result add(@RequestBody CreateCarMaintenanceRequest createCarMaintenanceRequest){return carMaintenanceService.add(createCarMaintenanceRequest);}
+    Result sendToMaintenance(@RequestBody CreateCarMaintenanceRequest createCarMaintenanceRequest)throws BusinessException {return carMaintenanceService.sendToMaintenance(createCarMaintenanceRequest);}
     @PutMapping("/update")
     Result update(@RequestBody UpdateCarMaintenanceRequest updateCarMaintenanceRequest){return carMaintenanceService.update(updateCarMaintenanceRequest);}
     @DeleteMapping("/delete")

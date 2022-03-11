@@ -3,7 +3,8 @@ package com.turkcell.rentACar.business.concretes;
 import com.turkcell.rentACar.business.abstracts.CarMaintenanceService;
 import com.turkcell.rentACar.business.abstracts.CarRentalService;
 import com.turkcell.rentACar.business.abstracts.CarService;
-import com.turkcell.rentACar.business.dtos.CarListDto;
+import com.turkcell.rentACar.business.abstracts.CityService;
+import com.turkcell.rentACar.business.dtos.carDtos.CarListDto;
 import com.turkcell.rentACar.business.requests.creates.CreateCarRequest;
 import com.turkcell.rentACar.business.requests.deletes.DeleteCarRequest;
 import com.turkcell.rentACar.business.requests.updates.UpdateCarRequest;
@@ -12,7 +13,6 @@ import com.turkcell.rentACar.core.utilities.mapping.ModelMapperManager;
 import com.turkcell.rentACar.core.utilities.results.*;
 import com.turkcell.rentACar.dataAccess.abstracts.CarDao;
 import com.turkcell.rentACar.entities.concretes.Car;
-import com.turkcell.rentACar.entities.concretes.CarRental;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
@@ -30,13 +30,15 @@ public class CarManager implements CarService {
     private ModelMapperManager modelMapperService;
     private CarRentalService carRentalService;
     private CarMaintenanceService carMaintenanceService;
+    private CityService cityService;
 
     @Autowired
-    public CarManager(CarDao carDao, ModelMapperManager modelMapperService, @Lazy CarRentalService carRentalService, @Lazy CarMaintenanceService carMaintenanceService) {
+    public CarManager(CarDao carDao, ModelMapperManager modelMapperService, @Lazy CarRentalService carRentalService, @Lazy CarMaintenanceService carMaintenanceService,CityService cityService) {
         this.carDao = carDao;
         this.modelMapperService = modelMapperService;
         this.carRentalService = carRentalService;
         this.carMaintenanceService = carMaintenanceService;
+        this.cityService = cityService;
     }
 
     @Override
@@ -55,6 +57,7 @@ public class CarManager implements CarService {
     @Override
     public Result add(CreateCarRequest createCarRequest) throws BusinessException {
         Car car = this.modelMapperService.forRequest().map(createCarRequest,Car.class);
+        car.setCurrentCity(this.cityService.getCityByCityId(createCarRequest.getCityId()));
         this.carDao.save(car);
         return new SuccessResult("Car Added Successfully");
     }
@@ -131,12 +134,18 @@ public class CarManager implements CarService {
         car.setCarMaintenanceStatus(status);
         carDao.save(car);
     }
+
+    @Override
+    public Car getCarByCarId(int id) {
+        return this.carDao.getById(id);
+    }
+
     void checkIfCarExists(int id) throws BusinessException{
         if(!this.carDao.existsById(id))
             throw new BusinessException("There is not any Car with This Id");
     }
     void checkIfSameCar(String brandName,String colorName) throws BusinessException{
-        if(!this.carDao.existsByBrand_BrandName(brandName) && !this.carDao.existsByBrand_ColorName(colorName))
+        if(!this.carDao.existsByBrand_BrandName(brandName) && !this.carDao.existsByColor_ColorName(colorName))
             throw new BusinessException("There is not any Car with This Id");
     }
 }

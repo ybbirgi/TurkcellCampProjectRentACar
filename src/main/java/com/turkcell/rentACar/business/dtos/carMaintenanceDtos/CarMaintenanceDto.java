@@ -1,4 +1,4 @@
-package com.turkcell.rentACar.business.dtos;
+package com.turkcell.rentACar.business.dtos.carMaintenanceDtos;
 
 import com.turkcell.rentACar.entities.concretes.Car;
 import lombok.AllArgsConstructor;

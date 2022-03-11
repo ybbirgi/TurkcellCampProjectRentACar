@@ -1,5 +1,6 @@
 package com.turkcell.rentACar.business.requests.updates;
 
+import com.turkcell.rentACar.entities.concretes.City;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,7 @@ import javax.validation.constraints.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateCarRequest {
+
     @NotNull
     @Positive
     private int carId;
@@ -34,4 +36,7 @@ public class UpdateCarRequest {
     @NotNull
     @PositiveOrZero
     private int brandId;
+
+    @NotNull
+    private int cityId;
 }

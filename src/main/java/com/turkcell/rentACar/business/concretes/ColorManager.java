@@ -1,8 +1,8 @@
 package com.turkcell.rentACar.business.concretes;
 
 import com.turkcell.rentACar.business.abstracts.ColorService;
-import com.turkcell.rentACar.business.dtos.ColorDto;
-import com.turkcell.rentACar.business.dtos.ColorListDto;
+import com.turkcell.rentACar.business.dtos.colorDtos.ColorDto;
+import com.turkcell.rentACar.business.dtos.colorDtos.ColorListDto;
 import com.turkcell.rentACar.business.requests.creates.CreateColorRequest;
 import com.turkcell.rentACar.business.requests.deletes.DeleteColorRequest;
 import com.turkcell.rentACar.business.requests.updates.UpdateColorRequest;
@@ -77,7 +77,7 @@ public class ColorManager implements ColorService {
     }
 
     void checkIfSameColor(String name) throws BusinessException {
-        if(this.colorDao.existsByName(name))
+        if(this.colorDao.existsByColorName(name))
             throw new BusinessException("This brand already exists");
     }
 }

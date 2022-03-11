@@ -1,6 +1,7 @@
 package com.turkcell.rentACar.business.requests.creates;
 
 import com.turkcell.rentACar.entities.concretes.Brand;
+import com.turkcell.rentACar.entities.concretes.City;
 import com.turkcell.rentACar.entities.concretes.Color;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -34,4 +35,8 @@ public class CreateCarRequest {
     @NotNull
     @PositiveOrZero
     private int brandId;
+
+    @NotNull
+    @PositiveOrZero
+    private int cityId;
 }
