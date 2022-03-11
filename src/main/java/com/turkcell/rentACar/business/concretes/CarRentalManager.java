@@ -11,7 +11,9 @@ import com.turkcell.rentACar.core.utilities.results.*;
 import com.turkcell.rentACar.dataAccess.abstracts.CarRentalDao;
 import com.turkcell.rentACar.entities.concretes.CarRental;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -26,6 +28,7 @@ public class CarRentalManager implements CarRentalService {
     private CarMaintenanceService carMaintenanceService;
     private CustomerService customerService;
     private CityService cityService;
+    private OrderedAdditionalServiceService orderedAdditionalServiceService;
 
     @Autowired
     public CarRentalManager(CarRentalDao carRentalDao,
@@ -33,13 +36,15 @@ public class CarRentalManager implements CarRentalService {
                             CarService carService,
                             CarMaintenanceService carMaintenanceService,
                             CustomerService customerService,
-                            CityService cityService) {
+                            CityService cityService,
+                            @Lazy OrderedAdditionalServiceService orderedAdditionalServiceService) {
         this.carRentalDao = carRentalDao;
         this.modelMapperService = modelMapperService;
         this.carService = carService;
         this.carMaintenanceService = carMaintenanceService;
         this.customerService = customerService;
         this.cityService = cityService;
+        this.orderedAdditionalServiceService = orderedAdditionalServiceService;
     }
 
     @Override
@@ -54,12 +59,13 @@ public class CarRentalManager implements CarRentalService {
         CarRental carRental = this.modelMapperService.forRequest().map(createCarRentalRequest,CarRental.class);
         modelMapperCorrection(carRental,createCarRentalRequest);
 
-        this.carService.updateCarMaintenanceStatus(createCarRentalRequest.getCarId(),
-                carMaintenanceService.checkIfCarIsInMaintenance(createCarRentalRequest.getCarId(),
-                        createCarRentalRequest.getRentalDate(),createCarRentalRequest.getRentalReturnDate()));
+        this.carRentalDao.saveAndFlush(carRental);
 
-        if(carService.getById(createCarRentalRequest.getCarId()).getData().isCarMaintenanceStatus())
-            return new ErrorResult("Car Is In Maintenance , Can't Rent This Car");
+        this.orderedAdditionalServiceService.add(createCarRentalRequest.getOrderedAdditionalServiceRequests(),carRental.getRentalId());
+
+        carRental.setOrderedAdditionalServices(this.orderedAdditionalServiceService.getAllByRentalCarId(carRental.getRentalId()));
+
+        updateMaintenanceStatusBeforeOperation(createCarRentalRequest);
 
         checkIfDatesAreCorrect(createCarRentalRequest);
 
@@ -112,7 +118,22 @@ public class CarRentalManager implements CarRentalService {
         return false;
     }
 
+    @Override
+    public CarRental getByRentalId(int id) {
+        return this.carRentalDao.getById(id);
+    }
+
+    private void updateMaintenanceStatusBeforeOperation(CreateCarRentalRequest createCarRentalRequest) throws BusinessException {
+        this.carService.updateCarMaintenanceStatus(createCarRentalRequest.getCarId(),
+                carMaintenanceService.checkIfCarIsInMaintenance(createCarRentalRequest.getCarId(),
+                        createCarRentalRequest.getRentalDate(),createCarRentalRequest.getRentalReturnDate()));
+
+        if(this.carService.getById(createCarRentalRequest.getCarId()).getData().isCarMaintenanceStatus())
+            throw new BusinessException("Car Is In Maintenance , Can't Rent This Car");
+    }
+
     private void modelMapperCorrection(CarRental carRental,CreateCarRentalRequest createCarRentalRequest) {
+        carRental.setRentalId(0);
         carRental.setCustomer(this.customerService.getCustomerByCustomerId(createCarRentalRequest.getCustomerId()));
         carRental.setReturnCity(this.cityService.getCityByCityId(createCarRentalRequest.getCityId()));
     }
@@ -123,13 +144,16 @@ public class CarRentalManager implements CarRentalService {
         if(this.carService.getCarByCarId(createCarRentalRequest.getCarId()).getCurrentCity() ==
                 this.cityService.getCityByCityId(createCarRentalRequest.getCityId()))
             return this.carService.getCarByCarId(createCarRentalRequest.getCarId()).getCarDailyPrice()*rentedDayValue;
+        if(this.carRentalDao.getById(createCarRentalRequest.getCarId()).getOrderedAdditionalServices() != null){
+            double servicesPayment = this.orderedAdditionalServiceService.calculateTotalPriceOfAdditionalServices(this.carRentalDao.getById(createCarRentalRequest.getCarId()).getOrderedAdditionalServices());
+            return this.carService.getCarByCarId(createCarRentalRequest.getCarId()).getCarDailyPrice()*rentedDayValue+citySwapFee+servicesPayment*rentedDayValue;
+        }
         return this.carService.getCarByCarId(createCarRentalRequest.getCarId()).getCarDailyPrice()*rentedDayValue+citySwapFee;
     }
 
     private void checkIfDatesAreCorrect(CreateCarRentalRequest createCarRentalRequest) throws BusinessException{
         if(createCarRentalRequest.getRentalDate().isAfter(createCarRentalRequest.getRentalReturnDate()))
             throw new BusinessException("Rental Date Must Be Earlier Than Return Date");
-
     }
 
 }

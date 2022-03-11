@@ -1,5 +1,6 @@
 package com.turkcell.rentACar.entities.concretes;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,12 +8,14 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name = "car_rentals")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "Lazy"})
 public class CarRental {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,4 +45,7 @@ public class CarRental {
 
     @Column(name = "total_payment")
     private Double totalPayment;
+
+    @OneToMany
+    private List<OrderedAdditionalService> orderedAdditionalServices;
 }
