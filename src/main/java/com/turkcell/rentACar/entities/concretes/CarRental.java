@@ -39,13 +39,16 @@ public class CarRental {
     @JoinColumn(name="city_id")
     private City returnCity;
 
-    @ManyToOne
-    @JoinColumn(name="customer_id")
-    private Customer customer;
-
     @Column(name = "total_payment")
     private Double totalPayment;
 
-    @OneToMany
+    @OneToMany(mappedBy = "carRental", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderedAdditionalService> orderedAdditionalServices;
+
+    @OneToOne(mappedBy = "carRental", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Invoice invoice;
+
+    @ManyToOne
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
 }

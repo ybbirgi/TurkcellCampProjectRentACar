@@ -11,4 +11,6 @@ public class OrderedAdditionalServiceListDto {
     private String additionalServiceName;
 
     private int quantity;
+
+    private int rentalId;
 }

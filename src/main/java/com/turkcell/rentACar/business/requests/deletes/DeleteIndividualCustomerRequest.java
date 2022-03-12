@@ -10,8 +10,8 @@ import javax.validation.constraints.Positive;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DeleteCustomerRequest {
+public class DeleteIndividualCustomerRequest {
     @NotNull
     @Positive
-    private int customerId;
+    private int userId;
 }

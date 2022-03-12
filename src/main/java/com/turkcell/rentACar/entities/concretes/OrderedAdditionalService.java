@@ -25,6 +25,9 @@ public class OrderedAdditionalService {
     @Column(name = "quantity")
     private int quantity;
 
+    @Column(name = "service_payment")
+    private Double servicePayment;
+
     @ManyToOne
     @JoinColumn(name = "rental_id")
     private CarRental carRental;

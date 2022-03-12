@@ -32,8 +32,6 @@ public class ColorManager implements ColorService {
     @Override
     public DataResult<List<ColorListDto>> getAll() {
         List<Color> result = this.colorDao.findAll();
-        if(result.isEmpty())
-            return new ErrorDataResult<List<ColorListDto>>(null,"Current List is Empty");
         List<ColorListDto> response = result.stream().map(color->this.modelMapperService.forDto().map(color,ColorListDto.class)).collect(Collectors.toList());
         return new SuccessDataResult<List<ColorListDto>>(response,"Colors Listed Successfully");
     }

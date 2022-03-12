@@ -30,8 +30,5 @@ public class CreateCarRentalRequest {
     @NotNull
     private int cityId;
 
-    @NotNull
-    private int customerId;
-
     private List<CreateOrderedAdditionalServiceRequest> orderedAdditionalServiceRequests;
 }

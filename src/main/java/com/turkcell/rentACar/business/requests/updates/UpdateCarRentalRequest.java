@@ -35,7 +35,4 @@ public class UpdateCarRentalRequest {
     @Positive
     private int cityId;
 
-    @NotNull
-    @PositiveOrZero
-    private int customerId;
 }

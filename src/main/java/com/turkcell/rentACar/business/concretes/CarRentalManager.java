@@ -26,7 +26,6 @@ public class CarRentalManager implements CarRentalService {
     private ModelMapperService modelMapperService;
     private CarService carService;
     private CarMaintenanceService carMaintenanceService;
-    private CustomerService customerService;
     private CityService cityService;
     private OrderedAdditionalServiceService orderedAdditionalServiceService;
 
@@ -35,14 +34,12 @@ public class CarRentalManager implements CarRentalService {
                             ModelMapperService modelMapperService,
                             CarService carService,
                             CarMaintenanceService carMaintenanceService,
-                            CustomerService customerService,
                             CityService cityService,
                             @Lazy OrderedAdditionalServiceService orderedAdditionalServiceService) {
         this.carRentalDao = carRentalDao;
         this.modelMapperService = modelMapperService;
         this.carService = carService;
         this.carMaintenanceService = carMaintenanceService;
-        this.customerService = customerService;
         this.cityService = cityService;
         this.orderedAdditionalServiceService = orderedAdditionalServiceService;
     }
@@ -134,7 +131,6 @@ public class CarRentalManager implements CarRentalService {
 
     private void modelMapperCorrection(CarRental carRental,CreateCarRentalRequest createCarRentalRequest) {
         carRental.setRentalId(0);
-        carRental.setCustomer(this.customerService.getCustomerByCustomerId(createCarRentalRequest.getCustomerId()));
         carRental.setReturnCity(this.cityService.getCityByCityId(createCarRentalRequest.getCityId()));
     }
 

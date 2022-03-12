@@ -18,9 +18,9 @@ public class User {
     @Column(name = "user_id")
     private int userId;
 
-    @Column(name= "first_name")
-    private String firstName;
+    @Column(name = "user_email")
+    private String email;
 
-    @Column(name= "last_name")
-    private String lastName;
+    @Column(name = "password")
+    private String password;
 }
