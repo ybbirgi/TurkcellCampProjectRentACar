@@ -48,8 +48,9 @@ public class CorporateCustomerManager implements CorporateCustomerService {
     }
 
     @Override
-    public Result add(CreateCorporateCustomerRequest createCorporateCustomerRequest) throws EmailAlreadyUsedException,TaxNumberAlreadyUsedException {
+    public Result add(CreateCorporateCustomerRequest createCorporateCustomerRequest) throws BusinessException {
         checkUniqueFieldsBeforeOperation(createCorporateCustomerRequest.getEmail(), createCorporateCustomerRequest.getTaxNumber());
+        checkIfTaxNumberRegex(createCorporateCustomerRequest.getTaxNumber());
 
         CorporateCustomer corporateCustomer = this.modelMapperService.forRequest().map(createCorporateCustomerRequest,CorporateCustomer.class);
 
@@ -70,8 +71,9 @@ public class CorporateCustomerManager implements CorporateCustomerService {
     }
 
     @Override
-    public Result update(UpdateCorporateCustomerRequest updateCorporateCustomerRequest) throws NotFoundException , EmailAlreadyUsedException,TaxNumberAlreadyUsedException{
+    public Result update(UpdateCorporateCustomerRequest updateCorporateCustomerRequest) throws BusinessException{
         this.customerService.checkIfCustomerExistsById(updateCorporateCustomerRequest.getCustomerId());
+        checkIfTaxNumberRegex(updateCorporateCustomerRequest.getTaxNumber());
         if(checkIfEmailChanged(updateCorporateCustomerRequest) || checkIfTaxNumberChanged(updateCorporateCustomerRequest))
             checkUniqueFieldsBeforeOperation(updateCorporateCustomerRequest.getEmail(), updateCorporateCustomerRequest.getTaxNumber());
 
@@ -107,5 +109,14 @@ public class CorporateCustomerManager implements CorporateCustomerService {
         if(updateCorporateCustomerRequest.getTaxNumber().equals(this.corporateCustomerDao.getById(updateCorporateCustomerRequest.getCustomerId()).getTaxNumber()))
             return false;
         return true;
+    }
+    private void checkIfTaxNumberRegex(String taxNumber) throws BusinessException {
+
+        String identityNumber = new String("nationalIdentity");
+        boolean matches = identityNumber.matches("/^[0-9]{10}$/");
+
+        if(!matches){
+            throw new BusinessException("Enter the correct ID number.");
+        }
     }
 }

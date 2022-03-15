@@ -25,12 +25,12 @@ public class IndividualCustomersController {
     @GetMapping("/getAll")
     DataResult<List<IndividualCustomerListDto>> getAll(){return this.individualCustomerService.getAll();}
     @PostMapping("/add")
-    Result add(@RequestBody CreateIndividualCustomerRequest createIndividualCustomerRequest) throws EmailAlreadyUsedException , NationalIdentityAlreadyUsedException {return this.individualCustomerService.add(createIndividualCustomerRequest);}
+    Result add(@RequestBody CreateIndividualCustomerRequest createIndividualCustomerRequest)throws BusinessException {return this.individualCustomerService.add(createIndividualCustomerRequest);}
     @GetMapping("/getById")
     DataResult<IndividualCustomerDto> getById(@RequestParam int id) throws NotFoundException {return this.individualCustomerService.getById(id);}
     @PutMapping("/update")
     Result update(@RequestBody UpdateIndividualCustomerRequest updateIndividualCustomerRequest) throws
-            NotFoundException, NationalIdentityAlreadyUsedException , EmailAlreadyUsedException {return this.individualCustomerService.update(updateIndividualCustomerRequest);}
+            BusinessException {return this.individualCustomerService.update(updateIndividualCustomerRequest);}
     @DeleteMapping("/delete")
     Result delete(@RequestBody DeleteIndividualCustomerRequest deleteIndividualCustomerRequest) throws NotFoundException{return this.individualCustomerService.delete(deleteIndividualCustomerRequest);}
 }

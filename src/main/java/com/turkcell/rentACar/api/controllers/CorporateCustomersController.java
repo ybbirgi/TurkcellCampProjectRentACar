@@ -26,13 +26,13 @@ public class CorporateCustomersController {
     @GetMapping("/getAll")
     DataResult<List<CorporateCustomerListDto>> getAll(){return this.corporateCustomerService.getAll();}
     @PostMapping("/add")
-    Result add(@RequestBody CreateCorporateCustomerRequest createCorporateCustomerRequest) throws EmailAlreadyUsedException, TaxNumberAlreadyUsedException
+    Result add(@RequestBody CreateCorporateCustomerRequest createCorporateCustomerRequest) throws BusinessException
     {return this.corporateCustomerService.add(createCorporateCustomerRequest);}
     @GetMapping("/getById")
     DataResult<CorporateCustomerDto> getById(@RequestParam int id) throws NotFoundException {return this.corporateCustomerService.getById(id);}
     @PutMapping("/update")
     Result update(@RequestBody UpdateCorporateCustomerRequest updateCorporateCustomerRequest)
-            throws NotFoundException,EmailAlreadyUsedException,TaxNumberAlreadyUsedException{
+            throws BusinessException{
         return this.corporateCustomerService.update(updateCorporateCustomerRequest);}
     @DeleteMapping("/delete")
     Result delete(@RequestBody DeleteCorporateCustomerRequest deleteCorporateCustomerRequest) throws NotFoundException{return this.corporateCustomerService.delete(deleteCorporateCustomerRequest);}

@@ -43,6 +43,7 @@ public class CarRentalsController {
         this.orderedAdditionalServiceService.add(rentalCarModel.getCreateOrderedAdditionalServiceRequestList(),invoiceNo);
         return this.invoiceService.addAdditionalServicesToInvoice(invoiceNo);
     }
+    @PostMapping("/rentCarToCorporateCustomer")
     Result rentCarToCorporateCustomer(@RequestBody RentalCarModel rentalCarModel)throws BusinessException {
         int rentId = this.carRentalService.rentCar(rentalCarModel.getCreateCarRentalRequest()).getData();
         int invoiceNo = this.invoiceService.createInvoice(rentalCarModel.getCreateCarRentalRequest(),rentId).getData();

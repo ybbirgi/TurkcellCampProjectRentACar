@@ -11,6 +11,7 @@ import com.turkcell.rentACar.core.utilities.exceptions.BusinessException;
 import com.turkcell.rentACar.core.utilities.exceptions.UpdateHasNoChangesException;
 import com.turkcell.rentACar.core.utilities.results.DataResult;
 import com.turkcell.rentACar.core.utilities.results.Result;
+import com.turkcell.rentACar.entities.concretes.AdditionalService;
 
 import java.util.List;
 
@@ -20,4 +21,5 @@ public interface AdditionalServiceService {
     DataResult<AdditionalServiceDto> getById(int id) throws NotFoundException;
     Result update(UpdateAdditionalServiceRequest updateAdditionalServiceRequest) throws NotFoundException, UpdateHasNoChangesException;
     Result delete(DeleteAdditionalServiceRequest deleteAdditionalServiceRequest) throws NotFoundException;
+    AdditionalService getServiceByServiceId(int id);
 }

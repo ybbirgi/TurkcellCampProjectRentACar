@@ -3,9 +3,12 @@ package com.turkcell.rentACar.business.concretes;
 import com.turkcell.rentACar.api.models.RentalCarModel;
 import com.turkcell.rentACar.business.abstracts.*;
 import com.turkcell.rentACar.business.dtos.brandDtos.BrandDto;
+import com.turkcell.rentACar.business.dtos.invoiceDtos.InvoiceDto;
 import com.turkcell.rentACar.business.dtos.invoiceDtos.InvoiceListDto;
 import com.turkcell.rentACar.business.requests.creates.CreateCarRentalRequest;
+import com.turkcell.rentACar.business.requests.deletes.DeleteInvoiceRequest;
 import com.turkcell.rentACar.core.utilities.exceptions.BusinessException;
+import com.turkcell.rentACar.core.utilities.exceptions.NotFoundException;
 import com.turkcell.rentACar.core.utilities.mapping.ModelMapperService;
 import com.turkcell.rentACar.core.utilities.results.*;
 import com.turkcell.rentACar.dataAccess.abstracts.InvoiceDao;
@@ -62,18 +65,25 @@ public class InvoiceManager implements InvoiceService {
     }
 
     @Override
-    public DataResult<BrandDto> getById(int id) throws BusinessException {
-        return null;
+    public DataResult<InvoiceDto> getById(int id) throws BusinessException {
+        checkIfInvoiceExistsById(id);
+
+        Invoice invoice = this.invoiceDao.getById(id);
+
+        InvoiceDto invoiceDto = this.modelMapperService.forDto().map(invoice,InvoiceDto.class);
+
+        return new SuccessDataResult<InvoiceDto>(invoiceDto,"Invoice Listed Successfully");
     }
 
     @Override
-    public Result update(RentalCarModel rentalCarModel) throws BusinessException {
-        return null;
-    }
+    public Result delete(DeleteInvoiceRequest deleteInvoiceRequest) throws BusinessException {
+        checkIfInvoiceExistsById(deleteInvoiceRequest.getInvoiceNo());
 
-    @Override
-    public Result delete(RentalCarModel rentalCarModel) throws BusinessException {
-        return null;
+        Invoice invoice = this.modelMapperService.forRequest().map(deleteInvoiceRequest,Invoice.class);
+
+        this.invoiceDao.delete(invoice);
+
+        return new SuccessResult("Invoice Deleted Successfully");
     }
 
     @Override
@@ -132,6 +142,22 @@ public class InvoiceManager implements InvoiceService {
         return new SuccessResult("Invoice Updated Successfully");
     }
 
+    @Override
+    public Result updateInvoiceIfOrderedAdditionalServiceDeletes(int invoiceNo, double price) {
+        Invoice invoice = this.getInvoiceByInvoiceNo(invoiceNo);
+        double totalPrice = invoice.getTotalPayment() - price * invoice.getRentDayValue();
+        invoice.setTotalPayment(totalPrice);
+        return new SuccessResult("Invoice Updated Successfully");
+    }
+
+    @Override
+    public Result updateInvoiceIfOrderedAdditionalServiceUpdates(int invoiceNo, double price) {
+        Invoice invoice = this.getInvoiceByInvoiceNo(invoiceNo);
+        double totalPrice = invoice.getTotalPayment() + price * invoice.getRentDayValue();
+        invoice.setTotalPayment(totalPrice);
+        return new SuccessResult("Invoice Updated Successfully");
+    }
+
 
     private void manuelMappingForInvoice(Invoice invoice,int rentalId){
         invoice.setCarRental(this.carRentalService.getByRentalId(rentalId));
@@ -165,4 +191,9 @@ public class InvoiceManager implements InvoiceService {
         }
         return priceChangeForAdditionalServices;
     }
+    public void checkIfInvoiceExistsById(Integer invoiceNo) throws NotFoundException{
+        if(!this.invoiceDao.existsById(invoiceNo))
+            throw new NotFoundException("Invoice Not Found");
+    }
+
 }

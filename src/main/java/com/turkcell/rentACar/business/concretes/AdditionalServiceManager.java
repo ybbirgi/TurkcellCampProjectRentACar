@@ -91,6 +91,11 @@ public class AdditionalServiceManager implements AdditionalServiceService {
         return new SuccessResult("Additional Service Deleted Successfully");
     }
 
+    @Override
+    public AdditionalService getServiceByServiceId(int id) {
+        return this.additionalServiceDao.getById(id);
+    }
+
     public void checkIfAdditionalServiceExistsByName(String serviceName) throws AlreadyExistsException {
         if(this.additionalServiceDao.existsByServiceName(serviceName))
             throw new AlreadyExistsException("This Additional Service Already Exists");

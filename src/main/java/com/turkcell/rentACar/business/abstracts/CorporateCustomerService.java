@@ -16,8 +16,8 @@ import java.util.List;
 
 public interface CorporateCustomerService {
     DataResult<List<CorporateCustomerListDto>> getAll();
-    Result add(CreateCorporateCustomerRequest createCorporateCustomerRequest) throws EmailAlreadyUsedException, TaxNumberAlreadyUsedException;
+    Result add(CreateCorporateCustomerRequest createCorporateCustomerRequest) throws BusinessException;
     DataResult<CorporateCustomerDto> getById(int id) throws NotFoundException;
-    Result update(UpdateCorporateCustomerRequest updateCorporateCustomerRequest) throws NotFoundException,EmailAlreadyUsedException,TaxNumberAlreadyUsedException;
+    Result update(UpdateCorporateCustomerRequest updateCorporateCustomerRequest) throws BusinessException;
     Result delete(DeleteCorporateCustomerRequest deleteCorporateCustomerRequest) throws NotFoundException;
 }

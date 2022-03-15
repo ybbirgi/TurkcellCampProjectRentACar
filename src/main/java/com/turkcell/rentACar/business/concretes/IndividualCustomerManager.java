@@ -46,8 +46,9 @@ public class IndividualCustomerManager implements IndividualCustomerService {
     }
 
     @Override
-    public Result add(CreateIndividualCustomerRequest createIndividualCustomerRequest) throws EmailAlreadyUsedException,NationalIdentityAlreadyUsedException {
+    public Result add(CreateIndividualCustomerRequest createIndividualCustomerRequest) throws BusinessException {
         checkUniqueFieldsBeforeOperation(createIndividualCustomerRequest.getEmail(), createIndividualCustomerRequest.getNationalIdentity());
+        checkIfNationalIdentityNumberRegex(createIndividualCustomerRequest.getNationalIdentity());
 
         IndividualCustomer individualCustomer = this.modelMapperService.forRequest().map(createIndividualCustomerRequest,IndividualCustomer.class);
 
@@ -68,8 +69,9 @@ public class IndividualCustomerManager implements IndividualCustomerService {
     }
 
     @Override
-    public Result update(UpdateIndividualCustomerRequest updateIndividualCustomerRequest) throws NotFoundException,EmailAlreadyUsedException,NationalIdentityAlreadyUsedException {
+    public Result update(UpdateIndividualCustomerRequest updateIndividualCustomerRequest) throws BusinessException {
         this.customerService.checkIfCustomerExistsById(updateIndividualCustomerRequest.getCustomerId());
+        checkIfNationalIdentityNumberRegex(updateIndividualCustomerRequest.getNationalIdentity());
         if(checkIfEmailChanged(updateIndividualCustomerRequest) || checkIfNationalIdentityNumberChanged(updateIndividualCustomerRequest))
             checkUniqueFieldsBeforeOperation(updateIndividualCustomerRequest.getEmail(), updateIndividualCustomerRequest.getNationalIdentity());
 
@@ -104,5 +106,14 @@ public class IndividualCustomerManager implements IndividualCustomerService {
         if(updateIndividualCustomerRequest.getNationalIdentity().equals(this.individualCustomerDao.getById(updateIndividualCustomerRequest.getCustomerId()).getNationalIdentity()))
             return false;
         return true;
+    }
+    private void checkIfNationalIdentityNumberRegex(String nationalIdentity) throws BusinessException {
+
+        String identityNumber = new String("nationalIdentity");
+        boolean matches = identityNumber.matches("^[1-9]{1}[0-9]{9}[02468]{1}$");
+
+        if(!matches){
+            throw new BusinessException("Enter the correct ID number.");
+        }
     }
 }

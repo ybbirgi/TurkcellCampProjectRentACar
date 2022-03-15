@@ -16,8 +16,8 @@ import java.util.List;
 
 public interface IndividualCustomerService {
     DataResult<List<IndividualCustomerListDto>> getAll();
-    Result add(CreateIndividualCustomerRequest createIndividualCustomerRequest) throws EmailAlreadyUsedException, NationalIdentityAlreadyUsedException;
+    Result add(CreateIndividualCustomerRequest createIndividualCustomerRequest) throws BusinessException;
     DataResult<IndividualCustomerDto> getById(int id) throws NotFoundException;
-    Result update(UpdateIndividualCustomerRequest updateIndividualCustomerRequest) throws NotFoundException,NationalIdentityAlreadyUsedException,EmailAlreadyUsedException;
+    Result update(UpdateIndividualCustomerRequest updateIndividualCustomerRequest) throws BusinessException;
     Result delete(DeleteIndividualCustomerRequest deleteIndividualCustomerRequest) throws NotFoundException;
 }
