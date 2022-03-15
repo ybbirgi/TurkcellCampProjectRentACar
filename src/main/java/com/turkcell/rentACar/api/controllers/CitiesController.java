@@ -3,7 +3,6 @@ package com.turkcell.rentACar.api.controllers;
 import com.turkcell.rentACar.business.abstracts.CityService;
 import com.turkcell.rentACar.business.dtos.cityDtos.CityDto;
 import com.turkcell.rentACar.business.dtos.cityDtos.CityListDto;
-import com.turkcell.rentACar.core.utilities.exceptions.BusinessException;
 import com.turkcell.rentACar.core.utilities.exceptions.NotFoundException;
 import com.turkcell.rentACar.core.utilities.results.DataResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,10 +14,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/cities")
-public class CitiesService {
+public class CitiesController {
     private CityService cityService;
 
-    public CitiesService(CityService cityService) {
+    public CitiesController(CityService cityService) {
         this.cityService = cityService;
     }
     @GetMapping("/getAll")
