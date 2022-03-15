@@ -15,6 +15,10 @@ import javax.validation.constraints.PositiveOrZero;
 public class UpdateOrderedAdditionalServiceRequest {
     @NotNull
     @PositiveOrZero
+    private int orderedServiceId;
+
+    @NotNull
+    @PositiveOrZero
     private int serviceId;
 
     @Positive

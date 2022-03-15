@@ -13,5 +13,5 @@ import javax.validation.constraints.Positive;
 public class DeleteIndividualCustomerRequest {
     @NotNull
     @Positive
-    private int userId;
+    private int customerId;
 }

@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -17,6 +19,15 @@ public class Invoice {
     @Column(name = "invoice_no")
     private int invoiceNo;
 
+    @Column(name = "invoice_creation_date")
+    private LocalDate invoiceDate;
+
+    @Column(name = "rent_start_date")
+    private LocalDate rentDate;
+
+    @Column(name = "rent_end_date")
+    private LocalDate rentEndDate;
+
     @Column(name = "rent_day_value")
     private Integer rentDayValue;
 
@@ -24,7 +35,13 @@ public class Invoice {
     @JoinColumn(name = "rental_id")
     private CarRental carRental;
 
+    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<OrderedAdditionalService> orderedAdditionalServices;
+
     @ManyToOne
     @JoinColumn(name = "customer_id")
     private Customer customer;
+
+    @Column(name = "total_payment")
+    private Double totalPayment;
 }

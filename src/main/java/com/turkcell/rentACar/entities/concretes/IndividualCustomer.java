@@ -11,7 +11,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Entity
 @Table(name = "individual_customers")
-@PrimaryKeyJoinColumn(name = "individual_customer_id")
+@PrimaryKeyJoinColumn(name = "customer_id")
 public class IndividualCustomer extends Customer{
     @Column(name = "first_name")
     private String firstName;
@@ -19,6 +19,6 @@ public class IndividualCustomer extends Customer{
     @Column(name = "last_name")
     private String lastName;
 
-    @Column(name = "national_identity")
+    @Column(name = "national_identity",unique = true)
     private String nationalIdentity;
 }

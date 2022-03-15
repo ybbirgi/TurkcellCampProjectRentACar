@@ -6,7 +6,7 @@ import com.turkcell.rentACar.business.dtos.individualCustomerDtos.IndividualCust
 import com.turkcell.rentACar.business.requests.creates.CreateIndividualCustomerRequest;
 import com.turkcell.rentACar.business.requests.deletes.DeleteIndividualCustomerRequest;
 import com.turkcell.rentACar.business.requests.updates.UpdateIndividualCustomerRequest;
-import com.turkcell.rentACar.core.utilities.exceptions.BusinessException;
+import com.turkcell.rentACar.core.utilities.exceptions.*;
 import com.turkcell.rentACar.core.utilities.results.DataResult;
 import com.turkcell.rentACar.core.utilities.results.Result;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +25,12 @@ public class IndividualCustomersController {
     @GetMapping("/getAll")
     DataResult<List<IndividualCustomerListDto>> getAll(){return this.individualCustomerService.getAll();}
     @PostMapping("/add")
-    Result add(@RequestBody CreateIndividualCustomerRequest createIndividualCustomerRequest) throws BusinessException{return this.individualCustomerService.add(createIndividualCustomerRequest);}
+    Result add(@RequestBody CreateIndividualCustomerRequest createIndividualCustomerRequest) throws EmailAlreadyUsedException , NationalIdentityAlreadyUsedException {return this.individualCustomerService.add(createIndividualCustomerRequest);}
     @GetMapping("/getById")
-    DataResult<IndividualCustomerDto> getById(@RequestParam int id) throws BusinessException{return this.individualCustomerService.getById(id);}
+    DataResult<IndividualCustomerDto> getById(@RequestParam int id) throws NotFoundException {return this.individualCustomerService.getById(id);}
     @PutMapping("/update")
-    Result update(@RequestBody UpdateIndividualCustomerRequest updateIndividualCustomerRequest) throws BusinessException{return this.individualCustomerService.update(updateIndividualCustomerRequest);}
+    Result update(@RequestBody UpdateIndividualCustomerRequest updateIndividualCustomerRequest) throws
+            NotFoundException, NationalIdentityAlreadyUsedException , EmailAlreadyUsedException {return this.individualCustomerService.update(updateIndividualCustomerRequest);}
     @DeleteMapping("/delete")
-    Result delete(@RequestBody DeleteIndividualCustomerRequest deleteIndividualCustomerRequest) throws BusinessException{return this.individualCustomerService.delete(deleteIndividualCustomerRequest);}
+    Result delete(@RequestBody DeleteIndividualCustomerRequest deleteIndividualCustomerRequest) throws NotFoundException{return this.individualCustomerService.delete(deleteIndividualCustomerRequest);}
 }

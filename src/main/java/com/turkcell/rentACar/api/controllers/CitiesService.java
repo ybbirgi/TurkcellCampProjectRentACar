@@ -4,6 +4,7 @@ import com.turkcell.rentACar.business.abstracts.CityService;
 import com.turkcell.rentACar.business.dtos.cityDtos.CityDto;
 import com.turkcell.rentACar.business.dtos.cityDtos.CityListDto;
 import com.turkcell.rentACar.core.utilities.exceptions.BusinessException;
+import com.turkcell.rentACar.core.utilities.exceptions.NotFoundException;
 import com.turkcell.rentACar.core.utilities.results.DataResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,5 +24,5 @@ public class CitiesService {
     @GetMapping("/getAll")
     DataResult<List<CityListDto>> getAll(){return this.cityService.getAll();}
     @GetMapping("/getById")
-    DataResult<CityDto> getById(@RequestParam int id) throws BusinessException{return this.cityService.getById(id);}
+    DataResult<CityDto> getById(@RequestParam int id) throws NotFoundException {return this.cityService.getById(id);}
 }

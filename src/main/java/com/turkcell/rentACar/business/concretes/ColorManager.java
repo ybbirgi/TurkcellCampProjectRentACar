@@ -6,7 +6,10 @@ import com.turkcell.rentACar.business.dtos.colorDtos.ColorListDto;
 import com.turkcell.rentACar.business.requests.creates.CreateColorRequest;
 import com.turkcell.rentACar.business.requests.deletes.DeleteColorRequest;
 import com.turkcell.rentACar.business.requests.updates.UpdateColorRequest;
+import com.turkcell.rentACar.core.utilities.exceptions.AlreadyExistsException;
 import com.turkcell.rentACar.core.utilities.exceptions.BusinessException;
+import com.turkcell.rentACar.core.utilities.exceptions.NotFoundException;
+import com.turkcell.rentACar.core.utilities.exceptions.UpdateHasNoChangesException;
 import com.turkcell.rentACar.core.utilities.mapping.ModelMapperManager;
 import com.turkcell.rentACar.core.utilities.results.*;
 import com.turkcell.rentACar.dataAccess.abstracts.ColorDao;
@@ -37,45 +40,65 @@ public class ColorManager implements ColorService {
     }
 
     @Override
-    public Result add(CreateColorRequest createColorRequest) throws BusinessException {
+    public Result add(CreateColorRequest createColorRequest) throws AlreadyExistsException {
+        checkIfColorExistsByName(createColorRequest.getColorName());
+
         Color color = this.modelMapperService.forRequest().map(createColorRequest,Color.class);
-        checkIfSameColor(color.getColorName());
+
         this.colorDao.save(color);
+
         return new SuccessResult("Color Added Successfully");
     }
 
     @Override
-    public DataResult<ColorDto> getById(int id) throws BusinessException{
-        checkIfColorExists(id);
+    public DataResult<ColorDto> getById(int id) throws NotFoundException {
+
+        checkIfColorExistsById(id);
+
         Color color = colorDao.getById(id);
+
         ColorDto colorDto = this.modelMapperService.forDto().map(color,ColorDto.class);
+
         return new SuccessDataResult<ColorDto>(colorDto,"Color Listed Successfully");
     }
 
     @Override
-    public Result update(UpdateColorRequest updateColorRequest) throws BusinessException{
-        checkIfColorExists(updateColorRequest.getColorId());
-        Color color = colorDao.getById(updateColorRequest.getColorId());
-        checkIfSameColor(color.getColorName());
-        color = this.modelMapperService.forRequest().map(updateColorRequest,Color.class);
+    public Result update(UpdateColorRequest updateColorRequest) throws NotFoundException, UpdateHasNoChangesException {
+
+        checkIfColorExistsById(updateColorRequest.getColorId());
+        checkIfUpdateHasNoChanges(updateColorRequest.getColorName());
+
+        Color color = this.modelMapperService.forRequest().map(updateColorRequest,Color.class);
+
         this.colorDao.save(color);
+
         return new SuccessResult("Color Updated Succesfully");
     }
 
     @Override
-    public Result delete(DeleteColorRequest deleteColorRequest) throws BusinessException{
-        checkIfColorExists(deleteColorRequest.getColorId());
+    public Result delete(DeleteColorRequest deleteColorRequest) throws NotFoundException{
+        checkIfColorExistsById(deleteColorRequest.getColorId());
+
         Color color = this.modelMapperService.forRequest().map(deleteColorRequest,Color.class);
+
         this.colorDao.delete(color);
+
         return new SuccessResult("Color Deleted Succesfully");
     }
-    void checkIfColorExists(int id) throws BusinessException {
-        if(!this.colorDao.existsById(id))
-            throw new BusinessException("There is not any Color with This Id");
+
+    void checkIfColorExistsByName(String name) throws AlreadyExistsException {
+        if(this.colorDao.existsByColorName(name))
+            throw new AlreadyExistsException("This Color already exists");
     }
 
-    void checkIfSameColor(String name) throws BusinessException {
-        if(this.colorDao.existsByColorName(name))
-            throw new BusinessException("This brand already exists");
+    void checkIfColorExistsById(int id) throws NotFoundException {
+        if(!this.colorDao.existsById(id))
+            throw new NotFoundException("There is not any Color with This Id");
     }
+
+    void checkIfUpdateHasNoChanges(String name) throws  UpdateHasNoChangesException{
+        if(this.colorDao.existsByColorName(name))
+            throw new UpdateHasNoChangesException("Color Update Has No Changes");
+    }
+
 }

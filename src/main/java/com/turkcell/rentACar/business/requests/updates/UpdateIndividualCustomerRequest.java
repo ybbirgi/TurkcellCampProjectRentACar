@@ -15,7 +15,7 @@ import javax.validation.constraints.Size;
 public class UpdateIndividualCustomerRequest {
     @NotNull
     @Positive
-    private int userId;
+    private int customerId;
 
     @Email
     @NotNull

@@ -6,7 +6,10 @@ import com.turkcell.rentACar.business.dtos.brandDtos.BrandListDto;
 import com.turkcell.rentACar.business.requests.creates.CreateBrandRequest;
 import com.turkcell.rentACar.business.requests.deletes.DeleteBrandRequest;
 import com.turkcell.rentACar.business.requests.updates.UpdateBrandRequest;
+import com.turkcell.rentACar.core.utilities.exceptions.AlreadyExistsException;
 import com.turkcell.rentACar.core.utilities.exceptions.BusinessException;
+import com.turkcell.rentACar.core.utilities.exceptions.NotFoundException;
+import com.turkcell.rentACar.core.utilities.exceptions.UpdateHasNoChangesException;
 import com.turkcell.rentACar.core.utilities.mapping.ModelMapperService;
 import com.turkcell.rentACar.core.utilities.results.*;
 import com.turkcell.rentACar.dataAccess.abstracts.BrandDao;
@@ -35,47 +38,65 @@ public class BrandManager implements BrandService {
     }
 
     @Override
-    public Result add(CreateBrandRequest createBrandRequest) throws BusinessException {
+    public Result add(CreateBrandRequest createBrandRequest) throws AlreadyExistsException {
+        checkIfBrandExistsByName(createBrandRequest.getBrandName());
+
         Brand brand = this.modelMapperService.forRequest().map(createBrandRequest,Brand.class);
-        checkIfSameBrand(brand.getBrandName());
+
         this.brandDao.save(brand);
+
         return new SuccessResult("Brand Added Successfully");
     }
 
     @Override
-    public DataResult<BrandDto> getById(int id) throws BusinessException{
-        checkIfBrandExists(id);
+    public DataResult<BrandDto> getById(int id) throws NotFoundException {
+        checkIfBrandExistsById(id);
 
         Brand brand = this.brandDao.getById(id);
+
         BrandDto brandDto = this.modelMapperService.forDto().map(brand,BrandDto.class);
+
         return new SuccessDataResult<BrandDto>(brandDto,"Brand Listed Successfully");
     }
 
     @Override
-    public Result update(UpdateBrandRequest updateBrandRequest) throws BusinessException {
-        checkIfBrandExists(updateBrandRequest.getBrandId());
+    public Result update(UpdateBrandRequest updateBrandRequest) throws NotFoundException, UpdateHasNoChangesException {
+
+        checkIfBrandExistsById(updateBrandRequest.getBrandId());
+        checkIfBrandUpdateHasNoChanges(updateBrandRequest.getBrandName());
 
         Brand brand = this.modelMapperService.forRequest().map(updateBrandRequest,Brand.class);
-        checkIfSameBrand(brand.getBrandName());
+
         this.brandDao.save(brand);
+
         return new SuccessResult("Brand Updated Successfully");
     }
 
     @Override
-    public Result delete(DeleteBrandRequest deleteBrandRequest) throws BusinessException{
-        checkIfBrandExists(deleteBrandRequest.getBrandId());
+    public Result delete(DeleteBrandRequest deleteBrandRequest) throws NotFoundException{
+
+        checkIfBrandExistsById(deleteBrandRequest.getBrandId());
+
         Brand brand = this.modelMapperService.forRequest().map(deleteBrandRequest,Brand.class);
+
         this.brandDao.delete(brand);
+
         return new SuccessResult("Brand Deleted Successfully");
     }
-    void checkIfBrandExists(int id) throws BusinessException {
-        if(!this.brandDao.existsById(id))
-            throw new BusinessException("There is not any Brand with This Id");
+
+    void checkIfBrandExistsByName(String name) throws AlreadyExistsException {
+        if(this.brandDao.existsByBrandName(name))
+            throw new AlreadyExistsException("This brand already exists");
     }
 
-    void checkIfSameBrand(String name) throws BusinessException {
+    void checkIfBrandExistsById(int id) throws NotFoundException {
+        if(!this.brandDao.existsById(id))
+            throw new NotFoundException("There is not any Brand with This Id");
+    }
+
+    void checkIfBrandUpdateHasNoChanges(String name) throws UpdateHasNoChangesException{
         if(this.brandDao.existsByBrandName(name))
-            throw new BusinessException("This brand already exists");
+            throw new UpdateHasNoChangesException("There is No Changes On Brand Update");
     }
 
 }

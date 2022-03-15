@@ -19,7 +19,7 @@ public class Color {
     @Column(name = "color_id")
     private int colorId;
 
-    @Column(name = "color_name")
+    @Column(name = "color_name",unique = true)
     private String colorName;
 
     @OneToMany(mappedBy = "color", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

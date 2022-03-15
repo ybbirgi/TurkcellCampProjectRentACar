@@ -6,6 +6,7 @@ import com.turkcell.rentACar.business.requests.creates.CreateCarRentalRequest;
 import com.turkcell.rentACar.business.requests.deletes.DeleteCarRentalRequest;
 import com.turkcell.rentACar.business.requests.updates.UpdateCarRentalRequest;
 import com.turkcell.rentACar.core.utilities.exceptions.BusinessException;
+import com.turkcell.rentACar.core.utilities.exceptions.NotFoundException;
 import com.turkcell.rentACar.core.utilities.mapping.ModelMapperService;
 import com.turkcell.rentACar.core.utilities.results.*;
 import com.turkcell.rentACar.dataAccess.abstracts.CarRentalDao;
@@ -13,13 +14,11 @@ import com.turkcell.rentACar.entities.concretes.CarRental;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
-
 @Service
 public class CarRentalManager implements CarRentalService {
     private CarRentalDao carRentalDao;
@@ -28,6 +27,8 @@ public class CarRentalManager implements CarRentalService {
     private CarMaintenanceService carMaintenanceService;
     private CityService cityService;
     private OrderedAdditionalServiceService orderedAdditionalServiceService;
+    private CustomerService customerService;
+    private InvoiceService invoiceService;
 
     @Autowired
     public CarRentalManager(CarRentalDao carRentalDao,
@@ -35,60 +36,73 @@ public class CarRentalManager implements CarRentalService {
                             CarService carService,
                             CarMaintenanceService carMaintenanceService,
                             CityService cityService,
-                            @Lazy OrderedAdditionalServiceService orderedAdditionalServiceService) {
+                            @Lazy OrderedAdditionalServiceService orderedAdditionalServiceService,
+                            CustomerService customerService,
+                            @Lazy InvoiceService invoiceService) {
         this.carRentalDao = carRentalDao;
         this.modelMapperService = modelMapperService;
         this.carService = carService;
         this.carMaintenanceService = carMaintenanceService;
         this.cityService = cityService;
         this.orderedAdditionalServiceService = orderedAdditionalServiceService;
+        this.customerService = customerService;
+        this.invoiceService = invoiceService;
     }
 
     @Override
     public DataResult<List<CarRentalListDto>> getAll() {
         List<CarRental> carRentals = this.carRentalDao.findAll();
-        List<CarRentalListDto> response = carRentals.stream().map(carRental->this.modelMapperService.forDto().map(carRental, CarRentalListDto.class)).collect(Collectors.toList());
+
+        List<CarRentalListDto> response = carRentals.stream().map(carRental->
+                this.modelMapperService.forDto().map(carRental, CarRentalListDto.class)).collect(Collectors.toList());
+
         return new SuccessDataResult<List<CarRentalListDto>>(response,"CarRentals Listed Successfully");
     }
 
     @Override
-    public Result rentCar(CreateCarRentalRequest createCarRentalRequest) throws BusinessException {
+    public DataResult<Integer> rentCar(CreateCarRentalRequest createCarRentalRequest) throws BusinessException {
+        updateAndCheckMaintenanceStatusBeforeOperation(createCarRentalRequest.getCarId(),
+                createCarRentalRequest.getRentalDate(), createCarRentalRequest.getRentalReturnDate());
+        updateAndCheckRentalStatusBeforeOperation(createCarRentalRequest.getCarId(),
+                createCarRentalRequest.getRentalDate(),createCarRentalRequest.getRentalReturnDate());
+        checkIfDatesAreCorrect(createCarRentalRequest.getRentalDate(),createCarRentalRequest.getRentalReturnDate());
+
         CarRental carRental = this.modelMapperService.forRequest().map(createCarRentalRequest,CarRental.class);
         modelMapperCorrection(carRental,createCarRentalRequest);
 
-        this.carRentalDao.saveAndFlush(carRental);
-
-        this.orderedAdditionalServiceService.add(createCarRentalRequest.getOrderedAdditionalServiceRequests(),carRental.getRentalId());
-
-        carRental.setOrderedAdditionalServices(this.orderedAdditionalServiceService.getAllByRentalCarId(carRental.getRentalId()));
-
-        updateMaintenanceStatusBeforeOperation(createCarRentalRequest);
-
-        checkIfDatesAreCorrect(createCarRentalRequest);
-
-        carRental.setTotalPayment(calculateCarRentPrice(createCarRentalRequest));
-
         this.carRentalDao.save(carRental);
-
-        this.carService.getCarByCarId(createCarRentalRequest.getCarId()).setCurrentCity(this.cityService.getCityByCityId(createCarRentalRequest.getCityId()));
 
         this.carService.updateCarRentalStatus(createCarRentalRequest.getCarId(),true);
 
-        return new SuccessResult("CarRental added Successfully");
+        return new SuccessDataResult<Integer>(carRental.getRentalId(),"CarRental added Successfully");
     }
 
     @Override
-    public Result update(UpdateCarRentalRequest updateCarRentalRequest) {
-        CarRental carRental = this.carRentalDao.getById(updateCarRentalRequest.getRentalId());
-        carRental = this.modelMapperService.forRequest().map(updateCarRentalRequest,CarRental.class);
+    public Result update(UpdateCarRentalRequest updateCarRentalRequest) throws BusinessException{
+        checkIfCarRentalExistsById(updateCarRentalRequest.getRentalId());
+        updateAndCheckMaintenanceStatusBeforeOperation(updateCarRentalRequest.getCarId(),
+                updateCarRentalRequest.getRentalDate(), updateCarRentalRequest.getRentalReturnDate());
+        updateAndCheckRentalStatusBeforeOperation(updateCarRentalRequest.getCarId(),
+                updateCarRentalRequest.getRentalDate(),updateCarRentalRequest.getRentalReturnDate());
+        checkIfDatesAreCorrect(updateCarRentalRequest.getRentalDate(),updateCarRentalRequest.getRentalReturnDate());
+
+        CarRental carRental = this.modelMapperService.forRequest().map(updateCarRentalRequest,CarRental.class);
+
+        checkIfCarRentalTimeChanged(updateCarRentalRequest);
+
         this.carRentalDao.save(carRental);
+
         return new SuccessResult("CarRental updated Successfully");
     }
 
     @Override
-    public Result delete(DeleteCarRentalRequest deleteCarRentalRequest) {
+    public Result delete(DeleteCarRentalRequest deleteCarRentalRequest) throws BusinessException{
+        checkIfCarRentalExistsById(deleteCarRentalRequest.getRentalId());
+
         CarRental carRental = this.carRentalDao.getById(deleteCarRentalRequest.getRentalId());
+
         this.carRentalDao.delete(carRental);
+
         return new SuccessResult("CarRental deleted Successfully");
     }
 
@@ -114,42 +128,58 @@ public class CarRentalManager implements CarRentalService {
         }
         return false;
     }
+    public boolean checkIfCarIsRented(int id, LocalDate startDate,LocalDate endDate){
+        List<CarRental> result=this.carRentalDao.getAllByCar_CarId(id);
+        for (CarRental carRental : result) {
+            if(carRental.getRentalReturnDate()==null ||
+                    startDate.now().isBefore(carRental.getRentalReturnDate()) &&
+                            startDate.now().isAfter(carRental.getRentalDate()) ||
+                    endDate.now().isBefore(carRental.getRentalReturnDate()) &&
+                            endDate.now().isAfter(carRental.getRentalDate()) ||
+                    startDate.now().isEqual(carRental.getRentalReturnDate()) &&
+                            endDate.now().isEqual(carRental.getRentalDate()))
+                return true;
+        }
+        return false;
+    }
 
     @Override
     public CarRental getByRentalId(int id) {
         return this.carRentalDao.getById(id);
     }
 
-    private void updateMaintenanceStatusBeforeOperation(CreateCarRentalRequest createCarRentalRequest) throws BusinessException {
-        this.carService.updateCarMaintenanceStatus(createCarRentalRequest.getCarId(),
-                carMaintenanceService.checkIfCarIsInMaintenance(createCarRentalRequest.getCarId(),
-                        createCarRentalRequest.getRentalDate(),createCarRentalRequest.getRentalReturnDate()));
-
-        if(this.carService.getById(createCarRentalRequest.getCarId()).getData().isCarMaintenanceStatus())
+    private void updateAndCheckMaintenanceStatusBeforeOperation(int carId,LocalDate startDate,LocalDate endDate) throws BusinessException {
+        this.carService.updateCarMaintenanceStatus(carId,carMaintenanceService.checkIfCarIsInMaintenance(carId, startDate,endDate));
+        if(this.carService.getCarByCarId(carId).isCarMaintenanceStatus())
             throw new BusinessException("Car Is In Maintenance , Can't Rent This Car");
+    }
+    private void updateAndCheckRentalStatusBeforeOperation(int carId,LocalDate startDate,LocalDate endDate) throws BusinessException{
+        this.carService.updateCarRentalStatus(carId,checkIfCarIsRented(carId,startDate,endDate));
+        if(this.carService.getCarByCarId(carId).isCarRentalStatus())
+            throw new BusinessException("Car is Rented , Can't Go Under Maintenance");
     }
 
     private void modelMapperCorrection(CarRental carRental,CreateCarRentalRequest createCarRentalRequest) {
         carRental.setRentalId(0);
         carRental.setReturnCity(this.cityService.getCityByCityId(createCarRentalRequest.getCityId()));
+        carRental.setCustomer(this.customerService.getCustomerByCustomerId(createCarRentalRequest.getCustomerId()));
     }
 
-    private double calculateCarRentPrice(CreateCarRentalRequest createCarRentalRequest) {
-        int rentedDayValue = (int) ChronoUnit.DAYS.between(createCarRentalRequest.getRentalDate(),createCarRentalRequest.getRentalReturnDate()) + 1;
-        double citySwapFee = 750.0;
-        if(this.carService.getCarByCarId(createCarRentalRequest.getCarId()).getCurrentCity() ==
-                this.cityService.getCityByCityId(createCarRentalRequest.getCityId()))
-            return this.carService.getCarByCarId(createCarRentalRequest.getCarId()).getCarDailyPrice()*rentedDayValue;
-        if(this.carRentalDao.getById(createCarRentalRequest.getCarId()).getOrderedAdditionalServices() != null){
-            double servicesPayment = this.orderedAdditionalServiceService.calculateTotalPriceOfAdditionalServices(this.carRentalDao.getById(createCarRentalRequest.getCarId()).getOrderedAdditionalServices());
-            return this.carService.getCarByCarId(createCarRentalRequest.getCarId()).getCarDailyPrice()*rentedDayValue+citySwapFee+servicesPayment*rentedDayValue;
-        }
-        return this.carService.getCarByCarId(createCarRentalRequest.getCarId()).getCarDailyPrice()*rentedDayValue+citySwapFee;
-    }
-
-    private void checkIfDatesAreCorrect(CreateCarRentalRequest createCarRentalRequest) throws BusinessException{
-        if(createCarRentalRequest.getRentalDate().isAfter(createCarRentalRequest.getRentalReturnDate()))
+    private void checkIfDatesAreCorrect(LocalDate startDate,LocalDate endDate) throws BusinessException{
+        if(startDate.isAfter(endDate))
             throw new BusinessException("Rental Date Must Be Earlier Than Return Date");
     }
 
+    private void checkIfCarRentalExistsById(int id) throws NotFoundException{
+        if(!this.carRentalDao.existsById(id))
+            throw new NotFoundException("There is not any CarRental with This Id");
+    }
+    private void checkIfCarRentalTimeChanged(UpdateCarRentalRequest updateCarRentalRequest){
+        if(updateCarRentalRequest.getRentalDate()!=this.carRentalDao.getById(updateCarRentalRequest.getCarId()).getRentalDate() ||
+                updateCarRentalRequest.getRentalReturnDate()!=this.carRentalDao.getById(updateCarRentalRequest.getCarId()).getRentalDate()){
+            int newRentDateValue = ((int) ChronoUnit.DAYS.between(updateCarRentalRequest.getRentalDate(),updateCarRentalRequest.getRentalReturnDate()));
+            this.invoiceService.updateInvoiceIfCarRentalUpdates(updateCarRentalRequest.getRentalId(), newRentDateValue,
+                    updateCarRentalRequest.getRentalDate(),updateCarRentalRequest.getRentalReturnDate());
+        }
+    }
 }

@@ -13,11 +13,11 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "customers")
-@PrimaryKeyJoinColumn(name = "customer_id")
+@PrimaryKeyJoinColumn(name = "customer_id",referencedColumnName = "user_id")
 public class Customer extends User {
 
-    @OneToMany(mappedBy = "customer",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    List<CarRental> carRentalList;
+    @Column(name = "customer_id",insertable = false,updatable = false)
+    private int customerId;
 
     @OneToMany(mappedBy = "customer",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     List<Invoice> invoiceList;

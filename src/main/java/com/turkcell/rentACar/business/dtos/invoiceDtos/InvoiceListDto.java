@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 
 @Data
 @AllArgsConstructor
@@ -12,11 +14,17 @@ public class InvoiceListDto {
 
     private int invoiceNo;
 
-    private Integer rentDayValue;
+    private LocalDate invoiceDate;
 
-    private Double totalPayment;
+    private LocalDate rentDate;
+
+    private LocalDate rentEndDate;
+
+    private Integer rentDayValue;
 
     private int rentalId;
 
     private int customerId;
+
+    private Double totalPayment;
 }

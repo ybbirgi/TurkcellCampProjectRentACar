@@ -10,6 +10,10 @@ import javax.validation.constraints.*;
 @NoArgsConstructor
 public class UpdateAdditionalServiceRequest {
     @NotNull
+    @Positive
+    private int serviceId;
+
+    @NotNull
     @NotBlank
     @Size(min=2,max=15)
     private String serviceName;

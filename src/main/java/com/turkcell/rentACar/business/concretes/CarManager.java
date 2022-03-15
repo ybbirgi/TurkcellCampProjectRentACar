@@ -1,5 +1,4 @@
 package com.turkcell.rentACar.business.concretes;
-
 import com.turkcell.rentACar.business.abstracts.CarMaintenanceService;
 import com.turkcell.rentACar.business.abstracts.CarRentalService;
 import com.turkcell.rentACar.business.abstracts.CarService;
@@ -9,6 +8,7 @@ import com.turkcell.rentACar.business.requests.creates.CreateCarRequest;
 import com.turkcell.rentACar.business.requests.deletes.DeleteCarRequest;
 import com.turkcell.rentACar.business.requests.updates.UpdateCarRequest;
 import com.turkcell.rentACar.core.utilities.exceptions.BusinessException;
+import com.turkcell.rentACar.core.utilities.exceptions.NotFoundException;
 import com.turkcell.rentACar.core.utilities.mapping.ModelMapperManager;
 import com.turkcell.rentACar.core.utilities.results.*;
 import com.turkcell.rentACar.dataAccess.abstracts.CarDao;
@@ -33,7 +33,11 @@ public class CarManager implements CarService {
     private CityService cityService;
 
     @Autowired
-    public CarManager(CarDao carDao, ModelMapperManager modelMapperService, @Lazy CarRentalService carRentalService, @Lazy CarMaintenanceService carMaintenanceService,CityService cityService) {
+    public CarManager(CarDao carDao,
+                      ModelMapperManager modelMapperService,
+                      @Lazy CarRentalService carRentalService,
+                      @Lazy CarMaintenanceService carMaintenanceService,
+                      CityService cityService) {
         this.carDao = carDao;
         this.modelMapperService = modelMapperService;
         this.carRentalService = carRentalService;
@@ -44,80 +48,99 @@ public class CarManager implements CarService {
     @Override
     public DataResult<List<CarListDto>> getAll() {
         List<Car> result = this.carDao.findAll();
-        if(result.isEmpty())
-            return new ErrorDataResult<List<CarListDto>>(null,"Current List is Empty");
-        for (Car car:result) {
-            updateCarMaintenanceStatus(car.getCarId(),this.carMaintenanceService.checkIfCarIsInMaintenance(car.getCarId(), LocalDate.now()));
-            updateCarRentalStatus(car.getCarId(),this.carRentalService.checkIfCarIsRented(car.getCarId(),LocalDate.now()));
-        }
+
+        updateCarStatusBeforeListing(result);
+
         List<CarListDto> response = result.stream().map(car->this.modelMapperService.forDto().map(car,CarListDto.class)).collect(Collectors.toList());
+
         return new SuccessDataResult<List<CarListDto>>(response,"Cars Listed succesfully");
     }
 
     @Override
-    public Result add(CreateCarRequest createCarRequest) throws BusinessException {
+    public Result add(CreateCarRequest createCarRequest){
         Car car = this.modelMapperService.forRequest().map(createCarRequest,Car.class);
+
         car.setCurrentCity(this.cityService.getCityByCityId(createCarRequest.getCityId()));
+
         this.carDao.save(car);
+
         return new SuccessResult("Car Added Successfully");
     }
 
     @Override
-    public Result update(UpdateCarRequest updateCarRequest) throws BusinessException{
-        checkIfCarExists(updateCarRequest.getCarId());
+    public Result update(UpdateCarRequest updateCarRequest) throws NotFoundException{
+        checkIfCarExistsById(updateCarRequest.getCarId());
+
         Car car = this.modelMapperService.forRequest().map(updateCarRequest,Car.class);
-        checkIfSameCar(car.getBrand().getBrandName(),car.getColor().getColorName());
+
         this.carDao.save(car);
+
         return new SuccessResult("Car Updated Successfully");
     }
 
     @Override
-    public Result delete(DeleteCarRequest deleteCarRequest) throws BusinessException{
-        checkIfCarExists(deleteCarRequest.getCarId());
+    public Result delete(DeleteCarRequest deleteCarRequest) throws NotFoundException{
+        checkIfCarExistsById(deleteCarRequest.getCarId());
+
         Car car = this.modelMapperService.forRequest().map(deleteCarRequest,Car.class);
+
         this.carDao.delete(car);
+
         return new SuccessResult("Car Deleted Successfully");
     }
 
     @Override
-    public DataResult<CarListDto> getById(int id) throws BusinessException{
+    public DataResult<CarListDto> getById(int id) throws NotFoundException{
+        checkIfCarExistsById(id);
+
         Car car = this.carDao.getById(id);
-        checkIfCarExists(id);
-        updateCarMaintenanceStatus(car.getCarId(),this.carMaintenanceService.checkIfCarIsInMaintenance(car.getCarId(), LocalDate.now()));
-        updateCarRentalStatus(car.getCarId(),this.carRentalService.checkIfCarIsRented(car.getCarId(),LocalDate.now()));
+
+        updateCarStatusBeforeListing(car);
+
         CarListDto carListDto = this.modelMapperService.forDto().map(car,CarListDto.class);
-        return new SuccessDataResult<CarListDto>(carListDto,"Car Getted Succesfully");
+
+        return new SuccessDataResult<CarListDto>(carListDto,"Car Listed Successfully");
     }
 
     @Override
     public DataResult<List<CarListDto>> getByCarDailyPriceLessThanOrEqual(Double carDailyPrice) {
+
         Sort sort = Sort.by(Sort.Direction.DESC,"carDailyPrice");
+
         List<Car> result = this.carDao.getByCarDailyPriceLessThanEqual(carDailyPrice,sort);
+
+        updateCarStatusBeforeListing(result);
+
         List<CarListDto> response = result.stream().map(car->this.modelMapperService.forDto().map(car,CarListDto.class)).collect(Collectors.toList());
+
         return new SuccessDataResult<List<CarListDto>>(response,"Cars Listed succesfully");
     }
 
     @Override
     public DataResult<List<CarListDto>> getAllPaged(int pageNo, int pageSize) {
+
         Pageable pageable = PageRequest.of(pageNo,pageSize);
+
         List<Car> result = this.carDao.findAll();
-        for(Car car : result){
-            updateCarMaintenanceStatus(car.getCarId(),this.carMaintenanceService.checkIfCarIsInMaintenance(car.getCarId(), LocalDate.now()));
-            updateCarRentalStatus(car.getCarId(),this.carRentalService.checkIfCarIsRented(car.getCarId(),LocalDate.now()));
-        }
+
+        updateCarStatusBeforeListing(result);
+
         List<CarListDto> response = result.stream().map(car->this.modelMapperService.forDto().map(car,CarListDto.class)).collect(Collectors.toList());
+
         return new SuccessDataResult<List<CarListDto>>(response,"Cars Listed succesfully");
     }
 
     @Override
     public DataResult<List<CarListDto>> getAllSorted(Sort.Direction direction) {
+
         Sort sort = Sort.by(direction,"carDailyPrice");
+
         List<Car> result =this.carDao.findAll(sort);
-        for(Car car : result){
-            updateCarMaintenanceStatus(car.getCarId(),this.carMaintenanceService.checkIfCarIsInMaintenance(car.getCarId(), LocalDate.now()));
-            updateCarRentalStatus(car.getCarId(),this.carRentalService.checkIfCarIsRented(car.getCarId(),LocalDate.now()));
-        }
+
+        updateCarStatusBeforeListing(result);
+
         List<CarListDto> response = result.stream().map(car->this.modelMapperService.forDto().map(car,CarListDto.class)).collect(Collectors.toList());
+
         return new SuccessDataResult<List<CarListDto>>(response,"Cars Listed succesfully");
     }
 
@@ -140,12 +163,20 @@ public class CarManager implements CarService {
         return this.carDao.getById(id);
     }
 
-    void checkIfCarExists(int id) throws BusinessException{
-        if(!this.carDao.existsById(id))
-            throw new BusinessException("There is not any Car with This Id");
+    private void updateCarStatusBeforeListing(List<Car> cars){
+        for (Car car:cars) {
+            updateCarMaintenanceStatus(car.getCarId(),this.carMaintenanceService.checkIfCarIsInMaintenance(car.getCarId(), LocalDate.now()));
+            updateCarRentalStatus(car.getCarId(),this.carRentalService.checkIfCarIsRented(car.getCarId(),LocalDate.now()));
+        }
     }
-    void checkIfSameCar(String brandName,String colorName) throws BusinessException{
-        if(!this.carDao.existsByBrand_BrandName(brandName) && !this.carDao.existsByColor_ColorName(colorName))
-            throw new BusinessException("There is not any Car with This Id");
+
+    private void updateCarStatusBeforeListing(Car car){
+        updateCarMaintenanceStatus(car.getCarId(),this.carMaintenanceService.checkIfCarIsInMaintenance(car.getCarId(), LocalDate.now()));
+        updateCarRentalStatus(car.getCarId(),this.carRentalService.checkIfCarIsRented(car.getCarId(),LocalDate.now()));
+    }
+
+    private void checkIfCarExistsById(int id) throws NotFoundException {
+        if(!this.carDao.existsById(id))
+            throw new NotFoundException("There is not any Car with This Id");
     }
 }

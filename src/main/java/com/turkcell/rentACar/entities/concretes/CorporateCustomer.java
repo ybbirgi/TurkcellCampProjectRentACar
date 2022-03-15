@@ -14,11 +14,11 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @Entity
 @Table(name = "corporate_customers")
-@PrimaryKeyJoinColumn(name = "corporate_customer_id")
+@PrimaryKeyJoinColumn(name = "customer_id")
 public class CorporateCustomer extends Customer{
     @Column(name = "company_name")
     private String companyName;
 
-    @Column(name = "tax_number")
+    @Column(name = "tax_number", unique = true)
     private String taxNumber;
 }

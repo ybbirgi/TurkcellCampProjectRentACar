@@ -7,6 +7,9 @@ import com.turkcell.rentACar.business.requests.creates.CreateCorporateCustomerRe
 import com.turkcell.rentACar.business.requests.deletes.DeleteCorporateCustomerRequest;
 import com.turkcell.rentACar.business.requests.updates.UpdateCorporateCustomerRequest;
 import com.turkcell.rentACar.core.utilities.exceptions.BusinessException;
+import com.turkcell.rentACar.core.utilities.exceptions.EmailAlreadyUsedException;
+import com.turkcell.rentACar.core.utilities.exceptions.NotFoundException;
+import com.turkcell.rentACar.core.utilities.exceptions.TaxNumberAlreadyUsedException;
 import com.turkcell.rentACar.core.utilities.results.DataResult;
 import com.turkcell.rentACar.core.utilities.results.Result;
 import org.springframework.web.bind.annotation.*;
@@ -23,11 +26,14 @@ public class CorporateCustomersController {
     @GetMapping("/getAll")
     DataResult<List<CorporateCustomerListDto>> getAll(){return this.corporateCustomerService.getAll();}
     @PostMapping("/add")
-    Result add(@RequestBody CreateCorporateCustomerRequest createCorporateCustomerRequest) throws BusinessException{return this.corporateCustomerService.add(createCorporateCustomerRequest);}
+    Result add(@RequestBody CreateCorporateCustomerRequest createCorporateCustomerRequest) throws EmailAlreadyUsedException, TaxNumberAlreadyUsedException
+    {return this.corporateCustomerService.add(createCorporateCustomerRequest);}
     @GetMapping("/getById")
-    DataResult<CorporateCustomerDto> getById(@RequestParam int id) throws BusinessException{return this.corporateCustomerService.getById(id);}
+    DataResult<CorporateCustomerDto> getById(@RequestParam int id) throws NotFoundException {return this.corporateCustomerService.getById(id);}
     @PutMapping("/update")
-    Result update(@RequestBody UpdateCorporateCustomerRequest updateCorporateCustomerRequest) throws BusinessException{return this.corporateCustomerService.update(updateCorporateCustomerRequest);}
+    Result update(@RequestBody UpdateCorporateCustomerRequest updateCorporateCustomerRequest)
+            throws NotFoundException,EmailAlreadyUsedException,TaxNumberAlreadyUsedException{
+        return this.corporateCustomerService.update(updateCorporateCustomerRequest);}
     @DeleteMapping("/delete")
-    Result delete(@RequestBody DeleteCorporateCustomerRequest deleteCorporateCustomerRequest) throws BusinessException{return this.corporateCustomerService.delete(deleteCorporateCustomerRequest);}
+    Result delete(@RequestBody DeleteCorporateCustomerRequest deleteCorporateCustomerRequest) throws NotFoundException{return this.corporateCustomerService.delete(deleteCorporateCustomerRequest);}
 }

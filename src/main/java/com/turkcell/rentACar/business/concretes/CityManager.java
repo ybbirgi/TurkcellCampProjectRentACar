@@ -4,11 +4,13 @@ import com.turkcell.rentACar.business.abstracts.CityService;
 import com.turkcell.rentACar.business.dtos.cityDtos.CityDto;
 import com.turkcell.rentACar.business.dtos.cityDtos.CityListDto;
 import com.turkcell.rentACar.core.utilities.exceptions.BusinessException;
+import com.turkcell.rentACar.core.utilities.exceptions.NotFoundException;
 import com.turkcell.rentACar.core.utilities.mapping.ModelMapperService;
 import com.turkcell.rentACar.core.utilities.results.DataResult;
 import com.turkcell.rentACar.core.utilities.results.SuccessDataResult;
 import com.turkcell.rentACar.dataAccess.abstracts.CityDao;
 import com.turkcell.rentACar.entities.concretes.City;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,7 +19,7 @@ import java.util.stream.Collectors;
 public class CityManager implements CityService {
     private CityDao cityDao;
     private ModelMapperService modelMapperService;
-
+    @Autowired
     public CityManager(CityDao cityDao, ModelMapperService modelMapperService) {
         this.cityDao = cityDao;
         this.modelMapperService = modelMapperService;
@@ -31,10 +33,16 @@ public class CityManager implements CityService {
     }
 
     @Override
-    public DataResult<CityDto> getById(int id) throws BusinessException {
+    public DataResult<CityDto> getById(int id) throws NotFoundException {
+
+        checkIfCityExistsByCityId(id);
+
         City city = this.cityDao.getById(id);
+
         CityDto cityDto = this.modelMapperService.forDto().map(city,CityDto.class);
+
         return new SuccessDataResult<CityDto>(cityDto,"City Listed Successfully");
+
     }
 
     @Override
@@ -42,4 +50,8 @@ public class CityManager implements CityService {
         return this.cityDao.getById(id);
     }
 
+    public void checkIfCityExistsByCityId(int id) throws NotFoundException{
+        if(!this.cityDao.existsByCityId(id))
+            throw new NotFoundException("City Not Found");
+    }
 }

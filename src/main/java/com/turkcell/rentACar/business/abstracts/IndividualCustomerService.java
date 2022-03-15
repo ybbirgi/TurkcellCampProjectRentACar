@@ -6,6 +6,9 @@ import com.turkcell.rentACar.business.requests.creates.CreateIndividualCustomerR
 import com.turkcell.rentACar.business.requests.deletes.DeleteIndividualCustomerRequest;
 import com.turkcell.rentACar.business.requests.updates.UpdateIndividualCustomerRequest;
 import com.turkcell.rentACar.core.utilities.exceptions.BusinessException;
+import com.turkcell.rentACar.core.utilities.exceptions.EmailAlreadyUsedException;
+import com.turkcell.rentACar.core.utilities.exceptions.NationalIdentityAlreadyUsedException;
+import com.turkcell.rentACar.core.utilities.exceptions.NotFoundException;
 import com.turkcell.rentACar.core.utilities.results.DataResult;
 import com.turkcell.rentACar.core.utilities.results.Result;
 
@@ -13,8 +16,8 @@ import java.util.List;
 
 public interface IndividualCustomerService {
     DataResult<List<IndividualCustomerListDto>> getAll();
-    Result add(CreateIndividualCustomerRequest createIndividualCustomerRequest) throws BusinessException;
-    DataResult<IndividualCustomerDto> getById(int id) throws BusinessException;
-    Result update(UpdateIndividualCustomerRequest updateIndividualCustomerRequest) throws BusinessException;
-    Result delete(DeleteIndividualCustomerRequest deleteIndividualCustomerRequest) throws BusinessException;
+    Result add(CreateIndividualCustomerRequest createIndividualCustomerRequest) throws EmailAlreadyUsedException, NationalIdentityAlreadyUsedException;
+    DataResult<IndividualCustomerDto> getById(int id) throws NotFoundException;
+    Result update(UpdateIndividualCustomerRequest updateIndividualCustomerRequest) throws NotFoundException,NationalIdentityAlreadyUsedException,EmailAlreadyUsedException;
+    Result delete(DeleteIndividualCustomerRequest deleteIndividualCustomerRequest) throws NotFoundException;
 }

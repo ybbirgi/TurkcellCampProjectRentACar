@@ -21,7 +21,7 @@ public class UpdateCarRentalRequest {
     @Size(min=2,max=50)
     @NotNull
     @NotBlank
-    private String maintenanceDescription;
+    private String rentDescription;
 
     private LocalDate rentalDate;
 

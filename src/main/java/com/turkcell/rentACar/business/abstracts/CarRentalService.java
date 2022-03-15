@@ -14,9 +14,9 @@ import java.util.List;
 
 public interface CarRentalService {
     DataResult<List<CarRentalListDto>> getAll();
-    Result rentCar(CreateCarRentalRequest createCarRentalRequest) throws BusinessException;
-    Result update(UpdateCarRentalRequest updateCarRentalRequest);
-    Result delete(DeleteCarRentalRequest deleteCarRentalRequest);
+    DataResult<Integer> rentCar(CreateCarRentalRequest createCarRentalRequest) throws BusinessException;
+    Result update(UpdateCarRentalRequest updateCarRentalRequest)throws BusinessException;
+    Result delete(DeleteCarRentalRequest deleteCarRentalRequest)throws BusinessException;
     DataResult<List<CarRentalListDto>> getByCarId(int id);
     boolean checkIfCarIsRented(int id, LocalDate localDate);
     CarRental getByRentalId(int id);

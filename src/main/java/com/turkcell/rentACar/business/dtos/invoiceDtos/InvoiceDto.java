@@ -12,15 +12,17 @@ import java.time.LocalDate;
 public class InvoiceDto {
     private int invoiceNo;
 
-    private Integer rentDayValue;
+    private LocalDate invoiceDate;
 
-    private Double totalPayment;
+    private LocalDate rentDate;
+
+    private LocalDate rentEndDate;
+
+    private Integer rentDayValue;
 
     private int rentalId;
 
     private int customerId;
 
-    private LocalDate rentalDate;
-
-    private LocalDate rentalReturnDate;
+    private Double totalPayment;
 }

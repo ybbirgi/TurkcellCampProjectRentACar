@@ -6,6 +6,7 @@ import com.turkcell.rentACar.business.requests.creates.CreateCarRequest;
 import com.turkcell.rentACar.business.requests.deletes.DeleteCarRequest;
 import com.turkcell.rentACar.business.requests.updates.UpdateCarRequest;
 import com.turkcell.rentACar.core.utilities.exceptions.BusinessException;
+import com.turkcell.rentACar.core.utilities.exceptions.NotFoundException;
 import com.turkcell.rentACar.core.utilities.results.DataResult;
 import com.turkcell.rentACar.core.utilities.results.Result;
 import org.springframework.data.domain.Sort;
@@ -30,17 +31,17 @@ public class CarsController {
     public DataResult<CarListDto> getById (@RequestParam int id) throws BusinessException{return this.carService.getById(id);}
 
     @PostMapping("/add")
-    public Result add(@RequestBody CreateCarRequest createCarRequest) throws BusinessException {
+    public Result add(@RequestBody CreateCarRequest createCarRequest){
         return this.carService.add(createCarRequest);
     }
 
     @PutMapping("/update")
-    public Result update(@RequestBody UpdateCarRequest updateCarRequest) throws BusinessException{
+    public Result update(@RequestBody UpdateCarRequest updateCarRequest) throws NotFoundException {
         return this.carService.update(updateCarRequest);
     }
 
     @DeleteMapping("/delete")
-    public Result delete(@RequestBody DeleteCarRequest deleteCarRequest) throws BusinessException{
+    public Result delete(@RequestBody DeleteCarRequest deleteCarRequest) throws NotFoundException{
         return this.carService.delete(deleteCarRequest);
     }
 
