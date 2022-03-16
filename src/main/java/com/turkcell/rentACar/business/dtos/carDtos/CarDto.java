@@ -13,6 +13,7 @@ public class CarDto {
     private String carDescription;
     private boolean carRentalStatus;
     private boolean carMaintenanceStatus;
+    private int carKilometer;
     private String brandName;
     private String colorName;
 }

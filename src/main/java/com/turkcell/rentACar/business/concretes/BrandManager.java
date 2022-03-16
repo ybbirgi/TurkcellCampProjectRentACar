@@ -33,7 +33,9 @@ public class BrandManager implements BrandService {
     @Override
     public DataResult<List<BrandListDto>> getAll() {
         List<Brand> result=this.brandDao.findAll();
+
         List<BrandListDto> response = result.stream().map(brand->this.modelMapperService.forDto().map(brand,BrandListDto.class)).collect(Collectors.toList());
+
         return new SuccessDataResult<List<BrandListDto>>(response,"Brands Listed Successfully");
     }
 

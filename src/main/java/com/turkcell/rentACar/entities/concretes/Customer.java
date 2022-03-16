@@ -13,12 +13,17 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "customers")
+//todo inheritance configuration
 @PrimaryKeyJoinColumn(name = "customer_id",referencedColumnName = "user_id")
 public class Customer extends User {
 
     @Column(name = "customer_id",insertable = false,updatable = false)
     private int customerId;
 
+    //todo addfield = dateRegistered;
+
     @OneToMany(mappedBy = "customer",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     List<Invoice> invoiceList;
+
+    //todo addfield = List<Carrental>
 }

@@ -4,6 +4,7 @@ import com.turkcell.rentACar.business.abstracts.*;
 import com.turkcell.rentACar.business.dtos.carRentalDtos.CarRentalListDto;
 import com.turkcell.rentACar.business.requests.creates.CreateCarRentalRequest;
 import com.turkcell.rentACar.business.requests.deletes.DeleteCarRentalRequest;
+import com.turkcell.rentACar.business.requests.ends.EndCarRentalRequest;
 import com.turkcell.rentACar.business.requests.updates.UpdateCarRentalRequest;
 import com.turkcell.rentACar.core.utilities.exceptions.BusinessException;
 import com.turkcell.rentACar.core.utilities.exceptions.NotFoundException;
@@ -75,6 +76,21 @@ public class CarRentalManager implements CarRentalService {
         this.carService.updateCarRentalStatus(createCarRentalRequest.getCarId(),true);
 
         return new SuccessDataResult<Integer>(carRental.getRentalId(),"CarRental added Successfully");
+    }
+
+    @Override
+    public DataResult<CarRental> endCarRental(EndCarRentalRequest endCarRentalRequest) throws BusinessException {
+        checkIfCarRentalExistsById(endCarRentalRequest.getRentalId());
+
+        CarRental carRental = this.carRentalDao.getById(endCarRentalRequest.getRentalId());
+
+        carRental.setEndedKilometer(endCarRentalRequest.getEndedKilometer());
+
+        this.carRentalDao.save(carRental);
+
+        this.carService.updateCarKilometer(carRental.getCar().getCarId(),endCarRentalRequest.getEndedKilometer());
+
+        return new SuccessDataResult<CarRental>(carRental,"Car Rental Ended Successfully");
     }
 
     @Override

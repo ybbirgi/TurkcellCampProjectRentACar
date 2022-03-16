@@ -28,6 +28,9 @@ public class UpdateCarRentalRequest {
     private LocalDate rentalReturnDate;
 
     @NotNull
+    private int startedKilometer;
+
+    @NotNull
     @Positive
     private int carId;
 

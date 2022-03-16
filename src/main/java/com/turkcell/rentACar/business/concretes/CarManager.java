@@ -148,14 +148,21 @@ public class CarManager implements CarService {
     public void updateCarRentalStatus(int id,boolean status) {
         Car car = this.carDao.getById(id);
         car.setCarRentalStatus(status);
-        carDao.save(car);
+        this.carDao.save(car);
     }
 
     @Override
     public void updateCarMaintenanceStatus(int id,boolean status) {
         Car car = this.carDao.getById(id);
         car.setCarMaintenanceStatus(status);
-        carDao.save(car);
+        this.carDao.save(car);
+    }
+
+    @Override
+    public void updateCarKilometer(int id,int carKilometer) {
+        Car car = this.carDao.getById(id);
+        car.setCarKilometer(carKilometer);
+        this.carDao.save(car);
     }
 
     @Override

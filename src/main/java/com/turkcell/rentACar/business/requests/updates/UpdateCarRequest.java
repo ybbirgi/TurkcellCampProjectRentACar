@@ -31,6 +31,10 @@ public class UpdateCarRequest {
 
     @NotNull
     @PositiveOrZero
+    private int carKilometer;
+
+    @NotNull
+    @PositiveOrZero
     private int colorId;
 
     @NotNull

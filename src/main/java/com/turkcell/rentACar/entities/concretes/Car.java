@@ -33,6 +33,9 @@ public class Car {
     @Column(name= "car_maintenance_status")
     private boolean carMaintenanceStatus;
 
+    @Column(name = "car_kilometer")
+    private int carKilometer;
+
     @ManyToOne
     @JoinColumn(name = "brand_id")
     private Brand brand;
@@ -50,4 +53,9 @@ public class Car {
     @ManyToOne
     @JoinColumn(name = "city_id")
     private City currentCity;
+
+    @OneToMany(mappedBy = "car")
+    private List<CarDamage> carDamages;
+
+
 }

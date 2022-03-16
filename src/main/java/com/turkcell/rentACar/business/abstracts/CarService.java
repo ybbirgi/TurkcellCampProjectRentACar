@@ -24,5 +24,6 @@ public interface CarService {
     DataResult<List<CarListDto>> getAllSorted(Sort.Direction direction);
     void updateCarRentalStatus(int id,boolean status);
     void updateCarMaintenanceStatus(int id,boolean status);
+    void updateCarKilometer(int id,int carKilometer);
     Car getCarByCarId(int id);
     }
