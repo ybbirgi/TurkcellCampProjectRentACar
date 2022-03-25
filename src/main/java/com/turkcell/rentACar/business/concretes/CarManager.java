@@ -161,7 +161,8 @@ public class CarManager implements CarService {
     @Override
     public void updateCarKilometer(int id,int carKilometer) {
         Car car = this.carDao.getById(id);
-        car.setCarKilometer(carKilometer);
+        int tempKilometer = car.getCarKilometer();
+        car.setCarKilometer(carKilometer+tempKilometer);
         this.carDao.save(car);
     }
 

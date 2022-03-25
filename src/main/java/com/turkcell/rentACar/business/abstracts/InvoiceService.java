@@ -1,8 +1,5 @@
 package com.turkcell.rentACar.business.abstracts;
 
-import com.turkcell.rentACar.api.models.InvoiceDateModel;
-import com.turkcell.rentACar.api.models.RentalCarModel;
-import com.turkcell.rentACar.business.dtos.brandDtos.BrandDto;
 import com.turkcell.rentACar.business.dtos.invoiceDtos.InvoiceDto;
 import com.turkcell.rentACar.business.dtos.invoiceDtos.InvoiceListDto;
 import com.turkcell.rentACar.business.requests.creates.CreateCarRentalRequest;

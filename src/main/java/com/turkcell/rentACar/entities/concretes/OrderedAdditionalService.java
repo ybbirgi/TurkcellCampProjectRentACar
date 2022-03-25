@@ -28,4 +28,8 @@ public class OrderedAdditionalService {
     @ManyToOne
     @JoinColumn(name = "invoice_id")
     private Invoice invoice;
+
+    @ManyToOne
+    @JoinColumn(name = "payment_id")
+    private Payment payment;
 }

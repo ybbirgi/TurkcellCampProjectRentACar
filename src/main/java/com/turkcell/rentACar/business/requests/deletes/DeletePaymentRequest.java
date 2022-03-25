@@ -1,15 +1,12 @@
-package com.turkcell.rentACar.api.models;
+package com.turkcell.rentACar.business.requests.deletes;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class InvoiceDateModel {
-    String firstDateString;
-
-    String secondDateString;
+public class DeletePaymentRequest {
+    private int paymentId;
 }

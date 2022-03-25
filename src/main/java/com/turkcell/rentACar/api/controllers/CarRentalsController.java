@@ -13,6 +13,7 @@ import com.turkcell.rentACar.core.utilities.exceptions.BusinessException;
 import com.turkcell.rentACar.core.utilities.results.DataResult;
 import com.turkcell.rentACar.core.utilities.results.Result;
 import com.turkcell.rentACar.entities.concretes.CarRental;
+import org.aspectj.bridge.MessageWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.web.bind.annotation.*;
@@ -61,3 +62,4 @@ public class CarRentalsController {
     @GetMapping("/getByCarId")
     DataResult<List<CarRentalListDto>> getByCarId(@RequestParam int id){return carRentalService.getByCarId(id);}
 }
+

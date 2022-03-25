@@ -31,7 +31,7 @@ public class Invoice {
     @Column(name = "rent_day_value")
     private Integer rentDayValue;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "rental_id")
     private CarRental carRental;
 
@@ -44,4 +44,7 @@ public class Invoice {
 
     @Column(name = "total_payment")
     private Double totalPayment;
+
+    @OneToOne(mappedBy = "invoice")
+    private Payment payment;
 }

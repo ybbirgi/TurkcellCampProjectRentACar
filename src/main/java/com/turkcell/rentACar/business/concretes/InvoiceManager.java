@@ -60,6 +60,7 @@ public class InvoiceManager implements InvoiceService {
         Invoice invoice = new Invoice();
         manuelMappingForInvoice(invoice,rentId);
         invoice.setTotalPayment(calculateCarRentPrice(invoice));
+
         this.invoiceDao.save(invoice);
         return new SuccessDataResult<Integer>(invoice.getInvoiceNo(),"Invoice Created Successfully");
     }

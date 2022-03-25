@@ -12,7 +12,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RentalCarModel {
-
     CreateCarRentalRequest createCarRentalRequest;
 
     List<CreateOrderedAdditionalServiceRequest> createOrderedAdditionalServiceRequestList;
