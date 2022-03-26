@@ -19,8 +19,8 @@ import java.util.List;
 
 public interface OrderedAdditionalServiceService {
     void add(List<CreateOrderedAdditionalServiceRequest> createOrderedAdditionalServiceRequests,int invoiceNo) throws BusinessException;
-    Result update(UpdateOrderedAdditionalServiceRequest updateOrderedAdditionalServiceRequest) throws NotFoundException, UpdateHasNoChangesException;
-    Result delete(DeleteOrderedAdditionalServiceRequest deleteOrderedAdditionalServiceRequest) throws NotFoundException;
+    //Result update(UpdateOrderedAdditionalServiceRequest updateOrderedAdditionalServiceRequest) throws NotFoundException, UpdateHasNoChangesException;
+    //Result delete(DeleteOrderedAdditionalServiceRequest deleteOrderedAdditionalServiceRequest) throws NotFoundException;
     DataResult<OrderedAdditionalServiceDto> getById(int id) throws NotFoundException;
-    public List<OrderedAdditionalService> getOrderedAdditionalServicesByInvoiceNo(int invoiceNo);
+    List<OrderedAdditionalService> getOrderedAdditionalServicesByRentalId(int rentalId);
 }

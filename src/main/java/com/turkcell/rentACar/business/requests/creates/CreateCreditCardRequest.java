@@ -4,14 +4,17 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.PositiveOrZero;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreatePaymentRequest {
-    @NotNull
-    @PositiveOrZero
-    private int rentalId;
+public class CreateCreditCardRequest {
+    private String cardHolder;
+
+    private String CardNo;
+
+    private int expirationMonth;
+
+    private int expirationYear;
+
+    private int CVV;
 }

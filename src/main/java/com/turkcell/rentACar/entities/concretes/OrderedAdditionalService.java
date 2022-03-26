@@ -26,10 +26,6 @@ public class OrderedAdditionalService {
     private int quantity;
 
     @ManyToOne
-    @JoinColumn(name = "invoice_id")
-    private Invoice invoice;
-
-    @ManyToOne
-    @JoinColumn(name = "payment_id")
-    private Payment payment;
+    @JoinColumn(name = "rental_id")
+    private CarRental carRental;
 }

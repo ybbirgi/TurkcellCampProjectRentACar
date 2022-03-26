@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 @Repository
 public interface OrderedAdditionalServiceDao extends JpaRepository<OrderedAdditionalService,Integer> {
-    List<OrderedAdditionalService> getAllByInvoice_InvoiceNo(Integer id);
+    List<OrderedAdditionalService> getAllByCarRental_RentalId(Integer id);
     boolean existsByQuantityAndAdditionalService_ServiceId(Integer quantity,Integer serviceId);
 }

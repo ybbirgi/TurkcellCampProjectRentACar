@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.List;
 
 @Data
 @Entity
@@ -28,9 +27,6 @@ public class Payment {
     @OneToOne
     @JoinColumn(name = "invoice_id")
     private Invoice invoice;
-
-    @OneToMany(mappedBy = "payment")
-    private List<OrderedAdditionalService> orderedAdditionalServices;
 
     @ManyToOne
     @JoinColumn(name = "customer_id")

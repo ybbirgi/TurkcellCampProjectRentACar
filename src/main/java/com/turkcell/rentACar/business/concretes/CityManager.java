@@ -1,6 +1,7 @@
 package com.turkcell.rentACar.business.concretes;
 
 import com.turkcell.rentACar.business.abstracts.CityService;
+import com.turkcell.rentACar.business.constants.messages.BusinessMessages;
 import com.turkcell.rentACar.business.dtos.cityDtos.CityDto;
 import com.turkcell.rentACar.business.dtos.cityDtos.CityListDto;
 import com.turkcell.rentACar.core.utilities.exceptions.BusinessException;
@@ -29,7 +30,7 @@ public class CityManager implements CityService {
     public DataResult<List<CityListDto>> getAll() {
         List<City> result = this.cityDao.findAll();
         List<CityListDto> response = result.stream().map(city -> this.modelMapperService.forDto().map(city,CityListDto.class)).collect(Collectors.toList());
-        return new SuccessDataResult<List<CityListDto>>(response,"Cities Listed Successfully");
+        return new SuccessDataResult<List<CityListDto>>(response, BusinessMessages.GlobalMessages.DATA_LISTED_SUCCESSFULLY);
     }
 
     @Override
@@ -41,7 +42,7 @@ public class CityManager implements CityService {
 
         CityDto cityDto = this.modelMapperService.forDto().map(city,CityDto.class);
 
-        return new SuccessDataResult<CityDto>(cityDto,"City Listed Successfully");
+        return new SuccessDataResult<CityDto>(cityDto,BusinessMessages.GlobalMessages.DATA_LISTED_SUCCESSFULLY);
 
     }
 
@@ -52,6 +53,6 @@ public class CityManager implements CityService {
 
     public void checkIfCityExistsByCityId(int id) throws NotFoundException{
         if(!this.cityDao.existsByCityId(id))
-            throw new NotFoundException("City Not Found");
+            throw new NotFoundException(BusinessMessages.CityMessages.CITY_NOT_FOUND);
     }
 }

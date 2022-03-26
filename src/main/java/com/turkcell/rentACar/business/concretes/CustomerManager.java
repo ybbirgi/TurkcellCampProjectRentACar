@@ -1,6 +1,7 @@
 package com.turkcell.rentACar.business.concretes;
 
 import com.turkcell.rentACar.business.abstracts.CustomerService;
+import com.turkcell.rentACar.business.constants.messages.BusinessMessages;
 import com.turkcell.rentACar.core.utilities.exceptions.EmailAlreadyUsedException;
 import com.turkcell.rentACar.core.utilities.exceptions.NotFoundException;
 import com.turkcell.rentACar.dataAccess.abstracts.CustomerDao;
@@ -25,13 +26,13 @@ public class CustomerManager implements CustomerService {
     @Override
     public void checkIfCustomerExistsByEmail(String email) throws EmailAlreadyUsedException {
         if(this.customerDao.existsByEmail(email))
-            throw new EmailAlreadyUsedException("This Email Is Already In Use");
+            throw new EmailAlreadyUsedException(BusinessMessages.CustomerMessages.CUSTOMER_EMAIL_ALREADY_EXISTS);
     }
 
     @Override
     public void checkIfCustomerExistsById(int customerId) throws NotFoundException {
         if(!this.customerDao.existsByCustomerId(customerId))
-            throw new NotFoundException("Customer Not Found");
+            throw new NotFoundException(BusinessMessages.CustomerMessages.CUSTOMER_NOT_FOUND);
     }
 
 

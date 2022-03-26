@@ -35,9 +35,6 @@ public class Invoice {
     @JoinColumn(name = "rental_id")
     private CarRental carRental;
 
-    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<OrderedAdditionalService> orderedAdditionalServices;
-
     @ManyToOne
     @JoinColumn(name = "customer_id")
     private Customer customer;

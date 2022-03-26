@@ -1,6 +1,7 @@
 package com.turkcell.rentACar.business.concretes;
 import com.turkcell.rentACar.business.abstracts.CorporateCustomerService;
 import com.turkcell.rentACar.business.abstracts.CustomerService;
+import com.turkcell.rentACar.business.constants.messages.BusinessMessages;
 import com.turkcell.rentACar.business.dtos.corporateCustomerDtos.CorporateCustomerDto;
 import com.turkcell.rentACar.business.dtos.corporateCustomerDtos.CorporateCustomerListDto;
 import com.turkcell.rentACar.business.requests.creates.CreateCorporateCustomerRequest;
@@ -44,19 +45,18 @@ public class CorporateCustomerManager implements CorporateCustomerService {
         List<CorporateCustomerListDto> response = result.stream().map(corporateCustomer->
                 this.modelMapperService.forDto().map(corporateCustomer,CorporateCustomerListDto.class)).collect(Collectors.toList());
 
-        return new SuccessDataResult<List<CorporateCustomerListDto>>(response,"Corporate Customers Listed Successfully");
+        return new SuccessDataResult<List<CorporateCustomerListDto>>(response, BusinessMessages.GlobalMessages.DATA_LISTED_SUCCESSFULLY);
     }
 
     @Override
     public Result add(CreateCorporateCustomerRequest createCorporateCustomerRequest) throws BusinessException {
         checkUniqueFieldsBeforeOperation(createCorporateCustomerRequest.getEmail(), createCorporateCustomerRequest.getTaxNumber());
-        checkIfTaxNumberRegex(createCorporateCustomerRequest.getTaxNumber());
 
         CorporateCustomer corporateCustomer = this.modelMapperService.forRequest().map(createCorporateCustomerRequest,CorporateCustomer.class);
 
         this.corporateCustomerDao.save(corporateCustomer);
 
-        return new SuccessResult("Corporate Customer Added Successfully");
+        return new SuccessResult(BusinessMessages.GlobalMessages.DATA_ADDED_SUCCESSFULLY);
     }
 
     @Override
@@ -67,13 +67,13 @@ public class CorporateCustomerManager implements CorporateCustomerService {
 
         CorporateCustomerDto corporateCustomerDto = this.modelMapperService.forDto().map(corporateCustomer,CorporateCustomerDto.class);
 
-        return new SuccessDataResult<CorporateCustomerDto>(corporateCustomerDto,"Corporate Customer Listed Successfully");
+        return new SuccessDataResult<CorporateCustomerDto>(corporateCustomerDto, BusinessMessages.GlobalMessages.DATA_LISTED_SUCCESSFULLY);
     }
 
     @Override
     public Result update(UpdateCorporateCustomerRequest updateCorporateCustomerRequest) throws BusinessException{
         this.customerService.checkIfCustomerExistsById(updateCorporateCustomerRequest.getCustomerId());
-        checkIfTaxNumberRegex(updateCorporateCustomerRequest.getTaxNumber());
+
         if(checkIfEmailChanged(updateCorporateCustomerRequest) || checkIfTaxNumberChanged(updateCorporateCustomerRequest))
             checkUniqueFieldsBeforeOperation(updateCorporateCustomerRequest.getEmail(), updateCorporateCustomerRequest.getTaxNumber());
 
@@ -81,7 +81,7 @@ public class CorporateCustomerManager implements CorporateCustomerService {
 
         this.corporateCustomerDao.save(corporateCustomer);
 
-        return new SuccessResult("Corporate Customer Updated Successfully");
+        return new SuccessResult(BusinessMessages.GlobalMessages.DATA_UPDATED_SUCCESSFULLY);
     }
 
     @Override
@@ -92,13 +92,13 @@ public class CorporateCustomerManager implements CorporateCustomerService {
 
         this.corporateCustomerDao.delete(corporateCustomer);
 
-        return new SuccessResult("Corporate Customer Deleted Successfully");
+        return new SuccessResult(BusinessMessages.GlobalMessages.DATA_DELETED_SUCCESSFULLY);
     }
 
     public void checkUniqueFieldsBeforeOperation(String email,String taxNumber) throws EmailAlreadyUsedException,TaxNumberAlreadyUsedException {
         this.customerService.checkIfCustomerExistsByEmail(email);
         if(this.corporateCustomerDao.existsByTaxNumber(taxNumber))
-            throw new TaxNumberAlreadyUsedException("Tax Number Is Already In Use");
+            throw new TaxNumberAlreadyUsedException(BusinessMessages.CorporateCustomerMessages.CORPORATE_CUSTOMER_TAX_NUMBER_ALREADY_EXISTS);
     }
     public boolean checkIfEmailChanged(UpdateCorporateCustomerRequest updateCorporateCustomerRequest){
         if(updateCorporateCustomerRequest.getEmail().equals(this.corporateCustomerDao.getById(updateCorporateCustomerRequest.getCustomerId()).getEmail()))
@@ -109,14 +109,5 @@ public class CorporateCustomerManager implements CorporateCustomerService {
         if(updateCorporateCustomerRequest.getTaxNumber().equals(this.corporateCustomerDao.getById(updateCorporateCustomerRequest.getCustomerId()).getTaxNumber()))
             return false;
         return true;
-    }
-    private void checkIfTaxNumberRegex(String taxNumber) throws BusinessException {
-
-        String identityNumber = new String("nationalIdentity");
-        boolean matches = identityNumber.matches("/^[0-9]{10}$/");
-
-        if(!matches){
-            throw new BusinessException("Enter the correct ID number.");
-        }
     }
 }

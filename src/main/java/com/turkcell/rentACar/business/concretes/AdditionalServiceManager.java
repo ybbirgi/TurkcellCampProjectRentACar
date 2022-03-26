@@ -1,6 +1,7 @@
 package com.turkcell.rentACar.business.concretes;
 
 import com.turkcell.rentACar.business.abstracts.AdditionalServiceService;
+import com.turkcell.rentACar.business.constants.messages.BusinessMessages;
 import com.turkcell.rentACar.business.dtos.additionalServiceDtos.AdditionalServiceDto;
 import com.turkcell.rentACar.business.dtos.additionalServiceDtos.AdditionalServiceListDto;
 import com.turkcell.rentACar.business.requests.creates.CreateAdditionalServiceRequest;
@@ -39,7 +40,7 @@ public class AdditionalServiceManager implements AdditionalServiceService {
         List<AdditionalServiceListDto> response = result.stream().map(additionalService ->
                 this.modelMapperService.forDto().map(additionalService, AdditionalServiceListDto.class)).collect(Collectors.toList());
 
-        return new SuccessDataResult<List<AdditionalServiceListDto>>(response, "Additional Services Listed Successfully");
+        return new SuccessDataResult<List<AdditionalServiceListDto>>(response, BusinessMessages.GlobalMessages.DATA_LISTED_SUCCESSFULLY);
     }
 
     @Override
@@ -51,7 +52,7 @@ public class AdditionalServiceManager implements AdditionalServiceService {
 
         this.additionalServiceDao.save(additionalService);
 
-        return new SuccessResult("Additional Service Added Successfully");
+        return new SuccessResult(BusinessMessages.GlobalMessages.DATA_ADDED_SUCCESSFULLY);
     }
 
     @Override
@@ -63,7 +64,7 @@ public class AdditionalServiceManager implements AdditionalServiceService {
 
         AdditionalServiceDto additionalServiceDto = this.modelMapperService.forDto().map(additionalService, AdditionalServiceDto.class);
 
-        return new SuccessDataResult<AdditionalServiceDto>(additionalServiceDto, "Additional Service Listed Successfully");
+        return new SuccessDataResult<AdditionalServiceDto>(additionalServiceDto, BusinessMessages.GlobalMessages.DATA_LISTED_SUCCESSFULLY);
     }
 
     @Override
@@ -76,7 +77,7 @@ public class AdditionalServiceManager implements AdditionalServiceService {
 
         this.additionalServiceDao.save(additionalService);
 
-        return new SuccessResult("Additional Service Updated Successfully");
+        return new SuccessResult(BusinessMessages.GlobalMessages.DATA_UPDATED_SUCCESSFULLY);
     }
 
     @Override
@@ -88,7 +89,7 @@ public class AdditionalServiceManager implements AdditionalServiceService {
 
         this.additionalServiceDao.delete(additionalService);
 
-        return new SuccessResult("Additional Service Deleted Successfully");
+        return new SuccessResult(BusinessMessages.GlobalMessages.DATA_DELETED_SUCCESSFULLY);
     }
 
     @Override
@@ -98,16 +99,16 @@ public class AdditionalServiceManager implements AdditionalServiceService {
 
     public void checkIfAdditionalServiceExistsByName(String serviceName) throws AlreadyExistsException {
         if(this.additionalServiceDao.existsByServiceName(serviceName))
-            throw new AlreadyExistsException("This Additional Service Already Exists");
+            throw new AlreadyExistsException(BusinessMessages.AdditionalServiceMessages.ADDITIONAL_SERVICE_ALREADY_EXISTS);
     }
 
     public void checkIfAdditionalServiceExistsById(int serviceId) throws NotFoundException {
         if(!this.additionalServiceDao.existsByServiceId(serviceId))
-            throw new NotFoundException("Additional Service Not Found");
+            throw new NotFoundException(BusinessMessages.AdditionalServiceMessages.ADDITIONAL_SERVICE_NOT_FOUND);
     }
 
     public void checkIfAdditionalServiceUpdateHasNoChanges(String serviceName, double dailyPrice) throws UpdateHasNoChangesException{
         if(this.additionalServiceDao.existsByServiceNameAndDailyPrice(serviceName,dailyPrice))
-            throw new UpdateHasNoChangesException("There is No Changes On Additional Service Update");
+            throw new UpdateHasNoChangesException(BusinessMessages.AdditionalServiceMessages.ADDITIONAL_SERVICE_HAS_NO_CHANGES);
     }
 }

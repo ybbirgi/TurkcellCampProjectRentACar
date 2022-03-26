@@ -1,5 +1,7 @@
 package com.turkcell.rentACar.api.controllers;
 
+import com.turkcell.rentACar.api.models.CorporateRentEndModel;
+import com.turkcell.rentACar.api.models.IndividualRentEndModel;
 import com.turkcell.rentACar.api.models.RentalCarModel;
 import com.turkcell.rentACar.business.abstracts.CarRentalService;
 import com.turkcell.rentACar.business.abstracts.InvoiceService;
@@ -18,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -39,26 +42,29 @@ public class CarRentalsController {
 
     @GetMapping("/getAll")
     DataResult<List<CarRentalListDto>> getAll(){return carRentalService.getAll();}
+
     @PostMapping("/rentCarToIndividualCustomer")
-    Result rentCarToIndividualCustomer(@RequestBody RentalCarModel rentalCarModel)throws BusinessException {
-        int rentId = this.carRentalService.rentCar(rentalCarModel.getCreateCarRentalRequest()).getData();
-        int invoiceNo = this.invoiceService.createInvoice(rentalCarModel.getCreateCarRentalRequest(),rentId).getData();
-        this.orderedAdditionalServiceService.add(rentalCarModel.getCreateOrderedAdditionalServiceRequestList(),invoiceNo);
-        return this.invoiceService.addAdditionalServicesToInvoice(invoiceNo);
+    DataResult<CarRental> rentCarToIndividualCustomer(@RequestBody @Valid RentalCarModel rentalCarModel)throws BusinessException {
+        return this.carRentalService.rentCarToIndividualCustomer(rentalCarModel);
     }
+
     @PostMapping("/rentCarToCorporateCustomer")
-    Result rentCarToCorporateCustomer(@RequestBody RentalCarModel rentalCarModel)throws BusinessException {
-        int rentId = this.carRentalService.rentCar(rentalCarModel.getCreateCarRentalRequest()).getData();
-        int invoiceNo = this.invoiceService.createInvoice(rentalCarModel.getCreateCarRentalRequest(),rentId).getData();
-        this.orderedAdditionalServiceService.add(rentalCarModel.getCreateOrderedAdditionalServiceRequestList(),invoiceNo);
-        return this.invoiceService.addAdditionalServicesToInvoice(invoiceNo);
+    DataResult<CarRental> rentCarToCorporateCustomer(@RequestBody @Valid RentalCarModel rentalCarModel)throws BusinessException {
+        return this.carRentalService.rentCarToCorporateCustomer(rentalCarModel);
     }
-    @PostMapping("/endRentCar")
-    DataResult<CarRental> endCarRental(EndCarRentalRequest endCarRentalRequest) throws BusinessException{return this.carRentalService.endCarRental(endCarRentalRequest);}
+
+    @PostMapping("/endRentForIndividual")
+    DataResult<CarRental> endCarRentalForIndividual(@RequestBody @Valid IndividualRentEndModel individualRentEndModel) throws BusinessException{return this.carRentalService.endCarRentalForIndividual(individualRentEndModel);}
+
+    @PostMapping("/endRentForCorporate")
+    DataResult<CarRental> endCarRentalForCorporate(@RequestBody @Valid CorporateRentEndModel corporateRentEndModel) throws BusinessException{return this.carRentalService.endCarRentalForCorporate(corporateRentEndModel);}
+
     @PutMapping("/update")
     Result update(@RequestBody UpdateCarRentalRequest updateCarRentalRequest)throws BusinessException{return carRentalService.update(updateCarRentalRequest);}
+
     @DeleteMapping("/delete")
     Result delete(@RequestBody DeleteCarRentalRequest deleteCarRentalRequest)throws BusinessException{return carRentalService.delete(deleteCarRentalRequest);}
+
     @GetMapping("/getByCarId")
     DataResult<List<CarRentalListDto>> getByCarId(@RequestParam int id){return carRentalService.getByCarId(id);}
 }

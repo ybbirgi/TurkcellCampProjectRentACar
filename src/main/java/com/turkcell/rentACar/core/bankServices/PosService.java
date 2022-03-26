@@ -1,5 +1,8 @@
 package com.turkcell.rentACar.core.bankServices;
 
+import com.turkcell.rentACar.business.requests.creates.CreateCreditCardRequest;
+
 public interface PosService {
-    boolean makePayment(String cardOwnerName, String cardNumber, int cardCVV,int cardEndMonth, int cardEndYear,double amount);
+    boolean isCardValid(CreateCreditCardRequest creditCardRequest);
+    boolean makePayment(double amount);
 }

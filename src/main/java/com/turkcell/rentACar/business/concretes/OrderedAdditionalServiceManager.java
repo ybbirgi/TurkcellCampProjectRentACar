@@ -4,6 +4,7 @@ import com.turkcell.rentACar.business.abstracts.AdditionalServiceService;
 import com.turkcell.rentACar.business.abstracts.CarRentalService;
 import com.turkcell.rentACar.business.abstracts.InvoiceService;
 import com.turkcell.rentACar.business.abstracts.OrderedAdditionalServiceService;
+import com.turkcell.rentACar.business.constants.messages.BusinessMessages;
 import com.turkcell.rentACar.business.dtos.additionalServiceDtos.AdditionalServiceListDto;
 import com.turkcell.rentACar.business.dtos.orderedAdditionalServiceDtos.OrderedAdditionalServiceDto;
 import com.turkcell.rentACar.business.dtos.orderedAdditionalServiceDtos.OrderedAdditionalServiceListDto;
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,16 +51,43 @@ public class OrderedAdditionalServiceManager implements OrderedAdditionalService
     }
 
     @Override
-    public void add(List<CreateOrderedAdditionalServiceRequest> createOrderedAdditionalServiceRequests,int invoiceNo) throws BusinessException {
-
+    public void add(List<CreateOrderedAdditionalServiceRequest> createOrderedAdditionalServiceRequests,int rentalId) throws BusinessException {
         for (CreateOrderedAdditionalServiceRequest requests: createOrderedAdditionalServiceRequests) {
             OrderedAdditionalService orderedAdditionalService = this.modelMapperService.forRequest().map(requests,OrderedAdditionalService.class);
-            orderedAdditionalService.setInvoice(this.invoiceService.getInvoiceByInvoiceNo(invoiceNo));
+            orderedAdditionalService.setCarRental(this.carRentalService.getByRentalId(rentalId));
             this.orderedAdditionalServiceDao.save(orderedAdditionalService);
         }
     }
 
     @Override
+    public DataResult<OrderedAdditionalServiceDto> getById(int id) throws NotFoundException {
+        checkIfOrderedAdditionalServiceExistsById(id);
+
+        OrderedAdditionalService orderedAdditionalService = this.orderedAdditionalServiceDao.getById(id);
+
+        OrderedAdditionalServiceDto orderedAdditionalServiceDto = this.modelMapperService.forDto().map(orderedAdditionalService,OrderedAdditionalServiceDto.class);
+
+        return new SuccessDataResult<OrderedAdditionalServiceDto>(orderedAdditionalServiceDto, BusinessMessages.GlobalMessages.DATA_LISTED_SUCCESSFULLY);
+    }
+
+
+    @Override
+    public List<OrderedAdditionalService> getOrderedAdditionalServicesByRentalId(int rentalId) {
+        return this.orderedAdditionalServiceDao.getAllByCarRental_RentalId(rentalId);
+    }
+
+    public void checkIfOrderedAdditionalServiceExistsById(int serviceId) throws NotFoundException {
+        if(!this.orderedAdditionalServiceDao.existsById(serviceId))
+            throw new NotFoundException(BusinessMessages.AdditionalServiceMessages.ADDITIONAL_SERVICE_NOT_FOUND);
+    }
+
+    /*
+    public void checkIfOrderedAdditionalServiceUpdateHasNoChanges(Integer quantity,Integer serviceId) throws UpdateHasNoChangesException{
+        if(this.orderedAdditionalServiceDao.existsByQuantityAndAdditionalService_ServiceId(quantity,serviceId))
+            throw new UpdateHasNoChangesException("There is No Changes On Ordered Additional Service Update");
+    }*/
+
+    /*@Override
     public Result update(UpdateOrderedAdditionalServiceRequest updateOrderedAdditionalServiceRequest) throws NotFoundException , UpdateHasNoChangesException {
         checkIfOrderedAdditionalServiceExistsById(updateOrderedAdditionalServiceRequest.getOrderedServiceId());
         OrderedAdditionalService orderedAdditionalService = this.orderedAdditionalServiceDao.getById(updateOrderedAdditionalServiceRequest.getOrderedServiceId());
@@ -72,8 +101,9 @@ public class OrderedAdditionalServiceManager implements OrderedAdditionalService
 
         return new SuccessResult("Ordered Additional Service Deleted Successfully");
 
-    }
+    }*/
 
+    /*
     @Override
     public Result delete(DeleteOrderedAdditionalServiceRequest deleteOrderedAdditionalServiceRequest) throws NotFoundException {
         OrderedAdditionalService orderedAdditionalService = this.orderedAdditionalServiceDao.getById(deleteOrderedAdditionalServiceRequest.getOrderedServiceId());
@@ -85,33 +115,7 @@ public class OrderedAdditionalServiceManager implements OrderedAdditionalService
         this.invoiceService.updateInvoiceIfOrderedAdditionalServiceDeletes(orderedAdditionalService.getInvoice().getInvoiceNo(),servicePrice);
 
         return new SuccessResult("Ordered Additional Service Deleted Successfully");
-    }
-
-    @Override
-    public DataResult<OrderedAdditionalServiceDto> getById(int id) throws NotFoundException {
-        checkIfOrderedAdditionalServiceExistsById(id);
-
-        OrderedAdditionalService orderedAdditionalService = this.orderedAdditionalServiceDao.getById(id);
-
-        OrderedAdditionalServiceDto orderedAdditionalServiceDto = this.modelMapperService.forDto().map(orderedAdditionalService,OrderedAdditionalServiceDto.class);
-
-        return new SuccessDataResult<OrderedAdditionalServiceDto>(orderedAdditionalServiceDto, "Ordered Additional Service Listed Successfully");
-    }
-
-    @Override
-    public List<OrderedAdditionalService> getOrderedAdditionalServicesByInvoiceNo(int invoiceNo) {
-        return this.orderedAdditionalServiceDao.getAllByInvoice_InvoiceNo(invoiceNo);
-    }
-
-    public void checkIfOrderedAdditionalServiceExistsById(int serviceId) throws NotFoundException {
-        if(!this.orderedAdditionalServiceDao.existsById(serviceId))
-            throw new NotFoundException("Additional Service Not Found");
-    }
-
-    public void checkIfOrderedAdditionalServiceUpdateHasNoChanges(Integer quantity,Integer serviceId) throws UpdateHasNoChangesException{
-        if(this.orderedAdditionalServiceDao.existsByQuantityAndAdditionalService_ServiceId(quantity,serviceId))
-            throw new UpdateHasNoChangesException("There is No Changes On Ordered Additional Service Update");
-    }
+    }*/
 
 }
 

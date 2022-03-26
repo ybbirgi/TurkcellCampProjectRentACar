@@ -2,6 +2,7 @@ package com.turkcell.rentACar.business.concretes;
 
 import com.turkcell.rentACar.business.abstracts.CustomerService;
 import com.turkcell.rentACar.business.abstracts.IndividualCustomerService;
+import com.turkcell.rentACar.business.constants.messages.BusinessMessages;
 import com.turkcell.rentACar.business.dtos.individualCustomerDtos.IndividualCustomerDto;
 import com.turkcell.rentACar.business.dtos.individualCustomerDtos.IndividualCustomerListDto;
 import com.turkcell.rentACar.business.requests.creates.CreateIndividualCustomerRequest;
@@ -42,19 +43,18 @@ public class IndividualCustomerManager implements IndividualCustomerService {
         List<IndividualCustomerListDto> response = result.stream().map(individualCustomer->
                 this.modelMapperService.forDto().map(individualCustomer,IndividualCustomerListDto.class)).collect(Collectors.toList());
 
-        return new SuccessDataResult<List<IndividualCustomerListDto>>(response,"Individual Customers Listed Successfully");
+        return new SuccessDataResult<List<IndividualCustomerListDto>>(response, BusinessMessages.GlobalMessages.DATA_LISTED_SUCCESSFULLY);
     }
 
     @Override
     public Result add(CreateIndividualCustomerRequest createIndividualCustomerRequest) throws BusinessException {
         checkUniqueFieldsBeforeOperation(createIndividualCustomerRequest.getEmail(), createIndividualCustomerRequest.getNationalIdentity());
-        checkIfNationalIdentityNumberRegex(createIndividualCustomerRequest.getNationalIdentity());
 
         IndividualCustomer individualCustomer = this.modelMapperService.forRequest().map(createIndividualCustomerRequest,IndividualCustomer.class);
 
         this.individualCustomerDao.save(individualCustomer);
 
-        return new SuccessResult("Individual Customer Added Successfully");
+        return new SuccessResult(BusinessMessages.GlobalMessages.DATA_ADDED_SUCCESSFULLY);
     }
 
     @Override
@@ -65,13 +65,13 @@ public class IndividualCustomerManager implements IndividualCustomerService {
 
         IndividualCustomerDto individualCustomerDto = this.modelMapperService.forDto().map(individualCustomer,IndividualCustomerDto.class);
 
-        return new SuccessDataResult<IndividualCustomerDto>(individualCustomerDto,"Individual Customer Listed Successfully");
+        return new SuccessDataResult<IndividualCustomerDto>(individualCustomerDto,BusinessMessages.GlobalMessages.DATA_LISTED_SUCCESSFULLY);
     }
 
     @Override
     public Result update(UpdateIndividualCustomerRequest updateIndividualCustomerRequest) throws BusinessException {
         this.customerService.checkIfCustomerExistsById(updateIndividualCustomerRequest.getCustomerId());
-        checkIfNationalIdentityNumberRegex(updateIndividualCustomerRequest.getNationalIdentity());
+
         if(checkIfEmailChanged(updateIndividualCustomerRequest) || checkIfNationalIdentityNumberChanged(updateIndividualCustomerRequest))
             checkUniqueFieldsBeforeOperation(updateIndividualCustomerRequest.getEmail(), updateIndividualCustomerRequest.getNationalIdentity());
 
@@ -79,7 +79,7 @@ public class IndividualCustomerManager implements IndividualCustomerService {
 
         this.individualCustomerDao.save(individualCustomer);
 
-        return new SuccessResult("Individual Customer Updated Successfully");
+        return new SuccessResult(BusinessMessages.GlobalMessages.DATA_UPDATED_SUCCESSFULLY);
     }
 
     @Override
@@ -90,12 +90,12 @@ public class IndividualCustomerManager implements IndividualCustomerService {
 
         this.individualCustomerDao.delete(individualCustomer);
 
-        return new SuccessResult("Individual Customer Updated Successfully");
+        return new SuccessResult(BusinessMessages.GlobalMessages.DATA_DELETED_SUCCESSFULLY);
     }
     public void checkUniqueFieldsBeforeOperation(String email,String nationalIdentity) throws EmailAlreadyUsedException, NationalIdentityAlreadyUsedException {
         this.customerService.checkIfCustomerExistsByEmail(email);
         if(this.individualCustomerDao.existsByNationalIdentity(nationalIdentity))
-            throw new NationalIdentityAlreadyUsedException("NationalIdentity Is Already In Use");
+            throw new NationalIdentityAlreadyUsedException(BusinessMessages.IndividualCustomerMessages.INDIVIDUAL_CUSTOMER_NATIONAL_IDENTITY_ALREADY_EXISTS);
     }
     public boolean checkIfEmailChanged(UpdateIndividualCustomerRequest updateIndividualCustomerRequest){
         if(updateIndividualCustomerRequest.getEmail().equals(this.individualCustomerDao.getById(updateIndividualCustomerRequest.getCustomerId()).getEmail()))
@@ -106,14 +106,5 @@ public class IndividualCustomerManager implements IndividualCustomerService {
         if(updateIndividualCustomerRequest.getNationalIdentity().equals(this.individualCustomerDao.getById(updateIndividualCustomerRequest.getCustomerId()).getNationalIdentity()))
             return false;
         return true;
-    }
-    private void checkIfNationalIdentityNumberRegex(String nationalIdentity) throws BusinessException {
-
-        String identityNumber = new String("nationalIdentity");
-        boolean matches = identityNumber.matches("^[1-9]{1}[0-9]{9}[02468]{1}$");
-
-        if(!matches){
-            throw new BusinessException("Enter the correct ID number.");
-        }
     }
 }

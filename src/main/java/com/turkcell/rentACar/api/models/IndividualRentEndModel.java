@@ -1,6 +1,7 @@
 package com.turkcell.rentACar.api.models;
 
 import com.turkcell.rentACar.business.requests.creates.CreateCreditCardRequest;
+import com.turkcell.rentACar.business.requests.ends.EndCarRentalRequest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,10 +11,12 @@ import javax.validation.Valid;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class IndividualCustomerPaymentModel {
+public class IndividualRentEndModel {
 
     @Valid
-    RentalCarModel rentalCarModel;
+    private EndCarRentalRequest endCarRentalRequest;
+
     @Valid
-    CreateCreditCardRequest creditCardRequest;
+    private CreateCreditCardRequest creditCardRequest;
+
 }

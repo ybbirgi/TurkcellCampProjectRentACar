@@ -3,6 +3,7 @@ import com.turkcell.rentACar.business.abstracts.CarMaintenanceService;
 import com.turkcell.rentACar.business.abstracts.CarRentalService;
 import com.turkcell.rentACar.business.abstracts.CarService;
 import com.turkcell.rentACar.business.abstracts.CityService;
+import com.turkcell.rentACar.business.constants.messages.BusinessMessages;
 import com.turkcell.rentACar.business.dtos.carDtos.CarListDto;
 import com.turkcell.rentACar.business.requests.creates.CreateCarRequest;
 import com.turkcell.rentACar.business.requests.deletes.DeleteCarRequest;
@@ -53,7 +54,7 @@ public class CarManager implements CarService {
 
         List<CarListDto> response = result.stream().map(car->this.modelMapperService.forDto().map(car,CarListDto.class)).collect(Collectors.toList());
 
-        return new SuccessDataResult<List<CarListDto>>(response,"Cars Listed succesfully");
+        return new SuccessDataResult<List<CarListDto>>(response, BusinessMessages.GlobalMessages.DATA_LISTED_SUCCESSFULLY);
     }
 
     @Override
@@ -64,7 +65,7 @@ public class CarManager implements CarService {
 
         this.carDao.save(car);
 
-        return new SuccessResult("Car Added Successfully");
+        return new SuccessResult(BusinessMessages.GlobalMessages.DATA_ADDED_SUCCESSFULLY);
     }
 
     @Override
@@ -75,7 +76,7 @@ public class CarManager implements CarService {
 
         this.carDao.save(car);
 
-        return new SuccessResult("Car Updated Successfully");
+        return new SuccessResult(BusinessMessages.GlobalMessages.DATA_UPDATED_SUCCESSFULLY);
     }
 
     @Override
@@ -86,7 +87,7 @@ public class CarManager implements CarService {
 
         this.carDao.delete(car);
 
-        return new SuccessResult("Car Deleted Successfully");
+        return new SuccessResult(BusinessMessages.GlobalMessages.DATA_DELETED_SUCCESSFULLY);
     }
 
     @Override
@@ -99,7 +100,7 @@ public class CarManager implements CarService {
 
         CarListDto carListDto = this.modelMapperService.forDto().map(car,CarListDto.class);
 
-        return new SuccessDataResult<CarListDto>(carListDto,"Car Listed Successfully");
+        return new SuccessDataResult<CarListDto>(carListDto,BusinessMessages.GlobalMessages.DATA_LISTED_SUCCESSFULLY);
     }
 
     @Override
@@ -113,7 +114,7 @@ public class CarManager implements CarService {
 
         List<CarListDto> response = result.stream().map(car->this.modelMapperService.forDto().map(car,CarListDto.class)).collect(Collectors.toList());
 
-        return new SuccessDataResult<List<CarListDto>>(response,"Cars Listed succesfully");
+        return new SuccessDataResult<List<CarListDto>>(response,BusinessMessages.GlobalMessages.DATA_LISTED_SUCCESSFULLY);
     }
 
     @Override
@@ -127,7 +128,7 @@ public class CarManager implements CarService {
 
         List<CarListDto> response = result.stream().map(car->this.modelMapperService.forDto().map(car,CarListDto.class)).collect(Collectors.toList());
 
-        return new SuccessDataResult<List<CarListDto>>(response,"Cars Listed succesfully");
+        return new SuccessDataResult<List<CarListDto>>(response,BusinessMessages.GlobalMessages.DATA_LISTED_SUCCESSFULLY);
     }
 
     @Override
@@ -141,7 +142,7 @@ public class CarManager implements CarService {
 
         List<CarListDto> response = result.stream().map(car->this.modelMapperService.forDto().map(car,CarListDto.class)).collect(Collectors.toList());
 
-        return new SuccessDataResult<List<CarListDto>>(response,"Cars Listed succesfully");
+        return new SuccessDataResult<List<CarListDto>>(response,BusinessMessages.GlobalMessages.DATA_LISTED_SUCCESSFULLY);
     }
 
     @Override
@@ -185,6 +186,6 @@ public class CarManager implements CarService {
 
     private void checkIfCarExistsById(int id) throws NotFoundException {
         if(!this.carDao.existsById(id))
-            throw new NotFoundException("There is not any Car with This Id");
+            throw new NotFoundException(BusinessMessages.CarMessages.CAR_NOT_FOUND);
     }
 }

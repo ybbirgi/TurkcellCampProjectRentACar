@@ -1,6 +1,7 @@
 package com.turkcell.rentACar.business.concretes;
 
 import com.turkcell.rentACar.business.abstracts.BrandService;
+import com.turkcell.rentACar.business.constants.messages.BusinessMessages;
 import com.turkcell.rentACar.business.dtos.brandDtos.BrandDto;
 import com.turkcell.rentACar.business.dtos.brandDtos.BrandListDto;
 import com.turkcell.rentACar.business.requests.creates.CreateBrandRequest;
@@ -36,7 +37,7 @@ public class BrandManager implements BrandService {
 
         List<BrandListDto> response = result.stream().map(brand->this.modelMapperService.forDto().map(brand,BrandListDto.class)).collect(Collectors.toList());
 
-        return new SuccessDataResult<List<BrandListDto>>(response,"Brands Listed Successfully");
+        return new SuccessDataResult<List<BrandListDto>>(response, BusinessMessages.GlobalMessages.DATA_LISTED_SUCCESSFULLY);
     }
 
     @Override
@@ -47,7 +48,7 @@ public class BrandManager implements BrandService {
 
         this.brandDao.save(brand);
 
-        return new SuccessResult("Brand Added Successfully");
+        return new SuccessResult(BusinessMessages.GlobalMessages.DATA_ADDED_SUCCESSFULLY);
     }
 
     @Override
@@ -58,7 +59,7 @@ public class BrandManager implements BrandService {
 
         BrandDto brandDto = this.modelMapperService.forDto().map(brand,BrandDto.class);
 
-        return new SuccessDataResult<BrandDto>(brandDto,"Brand Listed Successfully");
+        return new SuccessDataResult<BrandDto>(brandDto,BusinessMessages.GlobalMessages.DATA_LISTED_SUCCESSFULLY);
     }
 
     @Override
@@ -71,7 +72,7 @@ public class BrandManager implements BrandService {
 
         this.brandDao.save(brand);
 
-        return new SuccessResult("Brand Updated Successfully");
+        return new SuccessResult(BusinessMessages.GlobalMessages.DATA_UPDATED_SUCCESSFULLY);
     }
 
     @Override
@@ -83,22 +84,22 @@ public class BrandManager implements BrandService {
 
         this.brandDao.delete(brand);
 
-        return new SuccessResult("Brand Deleted Successfully");
+        return new SuccessResult(BusinessMessages.GlobalMessages.DATA_DELETED_SUCCESSFULLY);
     }
 
     void checkIfBrandExistsByName(String name) throws AlreadyExistsException {
         if(this.brandDao.existsByBrandName(name))
-            throw new AlreadyExistsException("This brand already exists");
+            throw new AlreadyExistsException(BusinessMessages.BrandMessages.BRAND_ALREADY_EXISTS);
     }
 
     void checkIfBrandExistsById(int id) throws NotFoundException {
         if(!this.brandDao.existsById(id))
-            throw new NotFoundException("There is not any Brand with This Id");
+            throw new NotFoundException(BusinessMessages.BrandMessages.BRAND_NOT_FOUND);
     }
 
     void checkIfBrandUpdateHasNoChanges(String name) throws UpdateHasNoChangesException{
         if(this.brandDao.existsByBrandName(name))
-            throw new UpdateHasNoChangesException("There is No Changes On Brand Update");
+            throw new UpdateHasNoChangesException(BusinessMessages.BrandMessages.BRAND_HAS_NO_CHANGES);
     }
 
 

@@ -1,6 +1,7 @@
 package com.turkcell.rentACar.business.concretes;
 
 import com.turkcell.rentACar.business.abstracts.ColorService;
+import com.turkcell.rentACar.business.constants.messages.BusinessMessages;
 import com.turkcell.rentACar.business.dtos.colorDtos.ColorDto;
 import com.turkcell.rentACar.business.dtos.colorDtos.ColorListDto;
 import com.turkcell.rentACar.business.requests.creates.CreateColorRequest;
@@ -36,7 +37,7 @@ public class ColorManager implements ColorService {
     public DataResult<List<ColorListDto>> getAll() {
         List<Color> result = this.colorDao.findAll();
         List<ColorListDto> response = result.stream().map(color->this.modelMapperService.forDto().map(color,ColorListDto.class)).collect(Collectors.toList());
-        return new SuccessDataResult<List<ColorListDto>>(response,"Colors Listed Successfully");
+        return new SuccessDataResult<List<ColorListDto>>(response, BusinessMessages.GlobalMessages.DATA_LISTED_SUCCESSFULLY);
     }
 
     @Override
@@ -47,7 +48,7 @@ public class ColorManager implements ColorService {
 
         this.colorDao.save(color);
 
-        return new SuccessResult("Color Added Successfully");
+        return new SuccessResult(BusinessMessages.GlobalMessages.DATA_ADDED_SUCCESSFULLY);
     }
 
     @Override
@@ -59,7 +60,7 @@ public class ColorManager implements ColorService {
 
         ColorDto colorDto = this.modelMapperService.forDto().map(color,ColorDto.class);
 
-        return new SuccessDataResult<ColorDto>(colorDto,"Color Listed Successfully");
+        return new SuccessDataResult<ColorDto>(colorDto, BusinessMessages.GlobalMessages.DATA_LISTED_SUCCESSFULLY);
     }
 
     @Override
@@ -72,7 +73,7 @@ public class ColorManager implements ColorService {
 
         this.colorDao.save(color);
 
-        return new SuccessResult("Color Updated Succesfully");
+        return new SuccessResult(BusinessMessages.GlobalMessages.DATA_UPDATED_SUCCESSFULLY);
     }
 
     @Override
@@ -83,22 +84,22 @@ public class ColorManager implements ColorService {
 
         this.colorDao.delete(color);
 
-        return new SuccessResult("Color Deleted Succesfully");
+        return new SuccessResult(BusinessMessages.GlobalMessages.DATA_DELETED_SUCCESSFULLY);
     }
 
     void checkIfColorExistsByName(String name) throws AlreadyExistsException {
         if(this.colorDao.existsByColorName(name))
-            throw new AlreadyExistsException("This Color already exists");
+            throw new AlreadyExistsException(BusinessMessages.ColorMessages.COLOR_ALREADY_EXISTS);
     }
 
     void checkIfColorExistsById(int id) throws NotFoundException {
         if(!this.colorDao.existsById(id))
-            throw new NotFoundException("There is not any Color with This Id");
+            throw new NotFoundException(BusinessMessages.ColorMessages.COLOR_NOT_FOUND);
     }
 
     void checkIfUpdateHasNoChanges(String name) throws  UpdateHasNoChangesException{
         if(this.colorDao.existsByColorName(name))
-            throw new UpdateHasNoChangesException("Color Update Has No Changes");
+            throw new UpdateHasNoChangesException(BusinessMessages.ColorMessages.COLOR_HAS_NO_CHANGES);
     }
 
 }

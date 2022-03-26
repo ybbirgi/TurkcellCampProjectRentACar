@@ -1,8 +1,11 @@
 package com.turkcell.rentACar.business.concretes;
 
+import com.turkcell.rentACar.api.models.*;
 import com.turkcell.rentACar.business.abstracts.*;
+import com.turkcell.rentACar.business.constants.messages.BusinessMessages;
 import com.turkcell.rentACar.business.dtos.carRentalDtos.CarRentalListDto;
 import com.turkcell.rentACar.business.requests.creates.CreateCarRentalRequest;
+import com.turkcell.rentACar.business.requests.creates.CreateOrderedAdditionalServiceRequest;
 import com.turkcell.rentACar.business.requests.deletes.DeleteCarRentalRequest;
 import com.turkcell.rentACar.business.requests.ends.EndCarRentalRequest;
 import com.turkcell.rentACar.business.requests.updates.UpdateCarRentalRequest;
@@ -12,12 +15,14 @@ import com.turkcell.rentACar.core.utilities.mapping.ModelMapperService;
 import com.turkcell.rentACar.core.utilities.results.*;
 import com.turkcell.rentACar.dataAccess.abstracts.CarRentalDao;
 import com.turkcell.rentACar.entities.concretes.CarRental;
+import com.turkcell.rentACar.entities.concretes.OrderedAdditionalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 @Service
@@ -30,6 +35,7 @@ public class CarRentalManager implements CarRentalService {
     private OrderedAdditionalServiceService orderedAdditionalServiceService;
     private CustomerService customerService;
     private InvoiceService invoiceService;
+    private PaymentService paymentService;
 
     @Autowired
     public CarRentalManager(CarRentalDao carRentalDao,
@@ -39,7 +45,8 @@ public class CarRentalManager implements CarRentalService {
                             CityService cityService,
                             @Lazy OrderedAdditionalServiceService orderedAdditionalServiceService,
                             CustomerService customerService,
-                            @Lazy InvoiceService invoiceService) {
+                            @Lazy InvoiceService invoiceService,
+                            @Lazy PaymentService paymentService) {
         this.carRentalDao = carRentalDao;
         this.modelMapperService = modelMapperService;
         this.carService = carService;
@@ -48,6 +55,7 @@ public class CarRentalManager implements CarRentalService {
         this.orderedAdditionalServiceService = orderedAdditionalServiceService;
         this.customerService = customerService;
         this.invoiceService = invoiceService;
+        this.paymentService = paymentService;
     }
 
     @Override
@@ -57,40 +65,81 @@ public class CarRentalManager implements CarRentalService {
         List<CarRentalListDto> response = carRentals.stream().map(carRental->
                 this.modelMapperService.forDto().map(carRental, CarRentalListDto.class)).collect(Collectors.toList());
 
-        return new SuccessDataResult<List<CarRentalListDto>>(response,"CarRentals Listed Successfully");
+        return new SuccessDataResult<List<CarRentalListDto>>(response, BusinessMessages.GlobalMessages.DATA_LISTED_SUCCESSFULLY);
     }
 
+    @Transactional
     @Override
-    public DataResult<Integer> rentCar(CreateCarRentalRequest createCarRentalRequest) throws BusinessException {
-        updateAndCheckMaintenanceStatusBeforeOperation(createCarRentalRequest.getCarId(),
-                createCarRentalRequest.getRentalDate(), createCarRentalRequest.getRentalReturnDate());
-        updateAndCheckRentalStatusBeforeOperation(createCarRentalRequest.getCarId(),
-                createCarRentalRequest.getRentalDate(),createCarRentalRequest.getRentalReturnDate());
-        checkIfDatesAreCorrect(createCarRentalRequest.getRentalDate(),createCarRentalRequest.getRentalReturnDate());
+    public DataResult<CarRental> rentCarToCorporateCustomer(RentalCarModel rentalCarModel) throws BusinessException {
+        updateAndCheckOperationsForCarRental(rentalCarModel.getCreateCarRentalRequest());
 
-        CarRental carRental = this.modelMapperService.forRequest().map(createCarRentalRequest,CarRental.class);
-        modelMapperCorrection(carRental,createCarRentalRequest);
+        CarRental carRental = this.modelMapperService.forRequest().map(rentalCarModel.getCreateCarRentalRequest(),CarRental.class);
+        modelMapperCorrection(carRental,rentalCarModel.getCreateCarRentalRequest());
+
+        carRental.setEndedKilometer(null);
 
         this.carRentalDao.save(carRental);
 
-        this.carService.updateCarRentalStatus(createCarRentalRequest.getCarId(),true);
+        this.carService.updateCarRentalStatus(rentalCarModel.getCreateCarRentalRequest().getCarId(),true);
 
-        return new SuccessDataResult<Integer>(carRental.getRentalId(),"CarRental added Successfully");
+        this.orderedAdditionalServiceService.add(rentalCarModel.getCreateOrderedAdditionalServiceRequestList(),carRental.getRentalId());
+
+        return new SuccessDataResult<CarRental>(carRental,BusinessMessages.GlobalMessages.DATA_ADDED_SUCCESSFULLY);
+    }
+
+    @Transactional
+    @Override
+    public DataResult<CarRental> rentCarToIndividualCustomer(RentalCarModel rentalCarModel) throws BusinessException {
+        updateAndCheckOperationsForCarRental(rentalCarModel.getCreateCarRentalRequest());
+
+        CarRental carRental = this.modelMapperService.forRequest().map(rentalCarModel.getCreateCarRentalRequest(),CarRental.class);
+        modelMapperCorrection(carRental,rentalCarModel.getCreateCarRentalRequest());
+
+        carRental.setEndedKilometer(null);
+
+        CarRental createdRental = this.carRentalDao.save(carRental);
+
+        this.carService.updateCarRentalStatus(rentalCarModel.getCreateCarRentalRequest().getCarId(),true);
+
+        this.orderedAdditionalServiceService.add(rentalCarModel.getCreateOrderedAdditionalServiceRequestList(),carRental.getRentalId());
+
+        return new SuccessDataResult<CarRental>(createdRental,BusinessMessages.GlobalMessages.DATA_ADDED_SUCCESSFULLY);
+    }
+
+
+
+    @Override
+    public DataResult<CarRental> endCarRentalForIndividual(IndividualRentEndModel individualRentEndModel) throws BusinessException {
+        checkIfCarRentalExistsById(individualRentEndModel.getEndCarRentalRequest().getRentalId());
+
+        CarRental carRental = this.carRentalDao.getById(individualRentEndModel.getEndCarRentalRequest().getRentalId());
+
+        carRental.setEndedKilometer(individualRentEndModel.getEndCarRentalRequest().getEndedKilometer());
+
+        CarRental createdRental = this.carRentalDao.save(carRental);
+
+        this.carService.updateCarKilometer(carRental.getCar().getCarId(),individualRentEndModel.getEndCarRentalRequest().getEndedKilometer());
+
+        checkIfReturnedDayIsOutOfDateForIndividual(individualRentEndModel, carRental);
+
+        return new SuccessDataResult<CarRental>(createdRental, BusinessMessages.CarRentalMessages.CAR_RENTAL_ENDED_SUCCESSFULLY);
     }
 
     @Override
-    public DataResult<CarRental> endCarRental(EndCarRentalRequest endCarRentalRequest) throws BusinessException {
-        checkIfCarRentalExistsById(endCarRentalRequest.getRentalId());
+    public DataResult<CarRental> endCarRentalForCorporate(CorporateRentEndModel corporateRentEndModel) throws BusinessException {
+        checkIfCarRentalExistsById(corporateRentEndModel.getEndCarRentalRequest().getRentalId());
 
-        CarRental carRental = this.carRentalDao.getById(endCarRentalRequest.getRentalId());
+        CarRental carRental = this.carRentalDao.getById(corporateRentEndModel.getEndCarRentalRequest().getRentalId());
 
-        carRental.setEndedKilometer(endCarRentalRequest.getEndedKilometer());
+        carRental.setEndedKilometer(corporateRentEndModel.getEndCarRentalRequest().getEndedKilometer());
 
-        this.carRentalDao.save(carRental);
+        CarRental createdRental = this.carRentalDao.save(carRental);
 
-        this.carService.updateCarKilometer(carRental.getCar().getCarId(),endCarRentalRequest.getEndedKilometer());
+        this.carService.updateCarKilometer(carRental.getCar().getCarId(),corporateRentEndModel.getEndCarRentalRequest().getEndedKilometer());
 
-        return new SuccessDataResult<CarRental>(carRental,"Car Rental Ended Successfully");
+        checkIfReturnedDayIsOutOfDateForCorporate(corporateRentEndModel, carRental);
+
+        return new SuccessDataResult<CarRental>(createdRental, BusinessMessages.CarRentalMessages.CAR_RENTAL_ENDED_SUCCESSFULLY);
     }
 
     @Override
@@ -104,11 +153,11 @@ public class CarRentalManager implements CarRentalService {
 
         CarRental carRental = this.modelMapperService.forRequest().map(updateCarRentalRequest,CarRental.class);
 
-        checkIfCarRentalTimeChanged(updateCarRentalRequest);
+        //checkIfCarRentalTimeChanged(updateCarRentalRequest);
 
         this.carRentalDao.save(carRental);
 
-        return new SuccessResult("CarRental updated Successfully");
+        return new SuccessResult(BusinessMessages.GlobalMessages.DATA_UPDATED_SUCCESSFULLY);
     }
 
     @Override
@@ -119,16 +168,16 @@ public class CarRentalManager implements CarRentalService {
 
         this.carRentalDao.delete(carRental);
 
-        return new SuccessResult("CarRental deleted Successfully");
+        return new SuccessResult(BusinessMessages.GlobalMessages.DATA_DELETED_SUCCESSFULLY);
     }
 
     @Override
     public DataResult<List<CarRentalListDto>> getByCarId(int id) {
         List<CarRental> carRentals = this.carRentalDao.getAllByCar_CarId(id);
-        if(carRentals.isEmpty())
-            return new ErrorDataResult<List<CarRentalListDto>>(null,"Current List is Empty");
-        List<CarRentalListDto> response = carRentals.stream().map(carMaintenance->this.modelMapperService.forDto().map(carRentals,CarRentalListDto.class)).collect(Collectors.toList());
-        return new SuccessDataResult<List<CarRentalListDto>>(response,"Car Rentals Listed Successfully");
+
+        List<CarRentalListDto> response = carRentals.stream().map(carRental->this.modelMapperService.forDto().map(carRental,CarRentalListDto.class)).collect(Collectors.toList());
+
+        return new SuccessDataResult<List<CarRentalListDto>>(response, BusinessMessages.GlobalMessages.DATA_LISTED_SUCCESSFULLY);
     }
 
     @Override
@@ -167,12 +216,12 @@ public class CarRentalManager implements CarRentalService {
     private void updateAndCheckMaintenanceStatusBeforeOperation(int carId,LocalDate startDate,LocalDate endDate) throws BusinessException {
         this.carService.updateCarMaintenanceStatus(carId,carMaintenanceService.checkIfCarIsInMaintenance(carId, startDate,endDate));
         if(this.carService.getCarByCarId(carId).isCarMaintenanceStatus())
-            throw new BusinessException("Car Is In Maintenance , Can't Rent This Car");
+            throw new BusinessException(BusinessMessages.CarRentalMessages.CAR_IS_AT_MAINTENANCE);
     }
     private void updateAndCheckRentalStatusBeforeOperation(int carId,LocalDate startDate,LocalDate endDate) throws BusinessException{
         this.carService.updateCarRentalStatus(carId,checkIfCarIsRented(carId,startDate,endDate));
         if(this.carService.getCarByCarId(carId).isCarRentalStatus())
-            throw new BusinessException("Car is Rented , Can't Go Under Maintenance");
+            throw new BusinessException(BusinessMessages.CarRentalMessages.CAR_IS_ALREADY_RENTED);
     }
 
     private void modelMapperCorrection(CarRental carRental,CreateCarRentalRequest createCarRentalRequest) {
@@ -183,13 +232,85 @@ public class CarRentalManager implements CarRentalService {
 
     private void checkIfDatesAreCorrect(LocalDate startDate,LocalDate endDate) throws BusinessException{
         if(startDate.isAfter(endDate))
-            throw new BusinessException("Rental Date Must Be Earlier Than Return Date");
+            throw new BusinessException(BusinessMessages.CarRentalMessages.RENTAL_DATES_ARE_NOT_CORRECT);
     }
 
     private void checkIfCarRentalExistsById(int id) throws NotFoundException{
         if(!this.carRentalDao.existsById(id))
-            throw new NotFoundException("There is not any CarRental with This Id");
+            throw new NotFoundException(BusinessMessages.CarRentalMessages.RENTAL_CAR_NOT_FOUND);
     }
+    private void updateAndCheckOperationsForCarRental(CreateCarRentalRequest createCarRentalRequest) throws BusinessException{
+        updateAndCheckMaintenanceStatusBeforeOperation(createCarRentalRequest.getCarId(),
+                createCarRentalRequest.getRentalDate(), createCarRentalRequest.getRentalReturnDate());
+        updateAndCheckRentalStatusBeforeOperation(createCarRentalRequest.getCarId(),
+                createCarRentalRequest.getRentalDate(),createCarRentalRequest.getRentalReturnDate());
+        checkIfDatesAreCorrect(createCarRentalRequest.getRentalDate(),createCarRentalRequest.getRentalReturnDate());
+    }
+
+    private void checkIfReturnedDayIsOutOfDateForIndividual(IndividualRentEndModel individualRentEndModel , CarRental carRental) throws BusinessException {
+        if(individualRentEndModel.getEndCarRentalRequest().getReturnDate() != carRental.getRentalReturnDate()) {
+
+            CreateCarRentalRequest createCarRentalRequest = manuelMappingForCreateRent(carRental);
+            createCarRentalRequest.setRentalDate(carRental.getRentalReturnDate());
+            createCarRentalRequest.setRentalReturnDate(individualRentEndModel.getEndCarRentalRequest().getReturnDate());
+            createCarRentalRequest.setCustomerId(carRental.getCustomer().getCustomerId());
+
+            List<CreateOrderedAdditionalServiceRequest> services = getAdditionalServices(carRental.getRentalId());
+
+            RentalCarModel rentalCarModel = new RentalCarModel();
+            rentalCarModel.setCreateCarRentalRequest(createCarRentalRequest);
+            rentalCarModel.setCreateOrderedAdditionalServiceRequestList(services);
+
+            IndividualCustomerPaymentModel individualCustomerPaymentModel = new IndividualCustomerPaymentModel();
+            individualCustomerPaymentModel.setRentalCarModel(rentalCarModel);
+            individualCustomerPaymentModel.setCreditCardRequest(individualRentEndModel.getCreditCardRequest());
+
+            this.paymentService.makePaymentForIndividualCustomer(individualCustomerPaymentModel,EnumSaveCreditCard.NO);
+        }
+    }
+
+    private CreateCarRentalRequest manuelMappingForCreateRent(CarRental carRental) throws BusinessException {
+        CreateCarRentalRequest createCarRentalRequest = new CreateCarRentalRequest();
+        createCarRentalRequest.setCarId(carRental.getCar().getCarId());
+        createCarRentalRequest.setRentDescription(BusinessMessages.CarRentalMessages.ADDITIONAL_RENT_FOR_DELIVERING_LATE);
+        createCarRentalRequest.setCityId(carRental.getReturnCity().getCityId());
+        createCarRentalRequest.setCustomerId(carRental.getCustomer().getCustomerId());
+
+        return createCarRentalRequest;
+    }
+
+    private void checkIfReturnedDayIsOutOfDateForCorporate(CorporateRentEndModel corporateRentEndModel , CarRental carRental) throws BusinessException {
+        if(corporateRentEndModel.getEndCarRentalRequest().getReturnDate() != carRental.getRentalReturnDate()) {
+
+            CreateCarRentalRequest createCarRentalRequest = manuelMappingForCreateRent(carRental);
+            createCarRentalRequest.setRentalDate(carRental.getRentalReturnDate());
+            createCarRentalRequest.setRentalReturnDate(corporateRentEndModel.getEndCarRentalRequest().getReturnDate());
+            createCarRentalRequest.setCustomerId(carRental.getCustomer().getCustomerId());
+
+            List<CreateOrderedAdditionalServiceRequest> services = getAdditionalServices(carRental.getRentalId());
+
+            RentalCarModel rentalCarModel = new RentalCarModel();
+            rentalCarModel.setCreateCarRentalRequest(createCarRentalRequest);
+            rentalCarModel.setCreateOrderedAdditionalServiceRequestList(services);
+
+            IndividualCustomerPaymentModel individualCustomerPaymentModel = new IndividualCustomerPaymentModel();
+            individualCustomerPaymentModel.setRentalCarModel(rentalCarModel);
+            individualCustomerPaymentModel.setCreditCardRequest(corporateRentEndModel.getCreditCardRequest());
+
+            this.paymentService.makePaymentForIndividualCustomer(individualCustomerPaymentModel,EnumSaveCreditCard.NO);
+        }
+    }
+
+    private List<CreateOrderedAdditionalServiceRequest> getAdditionalServices(int rentalId){
+        List<OrderedAdditionalService> additionalServices = this.orderedAdditionalServiceService.getOrderedAdditionalServicesByRentalId(rentalId);
+        List<CreateOrderedAdditionalServiceRequest> orderedAdditionalServiceRequests = new ArrayList<CreateOrderedAdditionalServiceRequest>();
+        for(int i=0;i< additionalServices.size();i++){
+            orderedAdditionalServiceRequests.get(i).setServiceId(additionalServices.get(i).getAdditionalService().getServiceId());
+            orderedAdditionalServiceRequests.get(i).setQuantity(additionalServices.get(i).getQuantity());
+        }
+        return orderedAdditionalServiceRequests;
+    }
+    /*
     private void checkIfCarRentalTimeChanged(UpdateCarRentalRequest updateCarRentalRequest){
         if(updateCarRentalRequest.getRentalDate()!=this.carRentalDao.getById(updateCarRentalRequest.getCarId()).getRentalDate() ||
                 updateCarRentalRequest.getRentalReturnDate()!=this.carRentalDao.getById(updateCarRentalRequest.getCarId()).getRentalDate()){
@@ -197,5 +318,5 @@ public class CarRentalManager implements CarRentalService {
             this.invoiceService.updateInvoiceIfCarRentalUpdates(updateCarRentalRequest.getRentalId(), newRentDateValue,
                     updateCarRentalRequest.getRentalDate(),updateCarRentalRequest.getRentalReturnDate());
         }
-    }
+    }*/
 }

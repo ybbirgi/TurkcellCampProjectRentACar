@@ -35,7 +35,7 @@ public class CarRental {
     private int startedKilometer;
 
     @Column(name = "car_ended_kilometer")
-    private int endedKilometer;
+    private Integer endedKilometer;
 
     @ManyToOne
     @JoinColumn(name="car_id")
@@ -44,6 +44,9 @@ public class CarRental {
     @ManyToOne
     @JoinColumn(name="city_id")
     private City returnCity;
+
+    @OneToMany(mappedBy = "carRental", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<OrderedAdditionalService> orderedAdditionalServices;
 
     @OneToMany(mappedBy = "carRental")
     private List<Invoice> invoice;
