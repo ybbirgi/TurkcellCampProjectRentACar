@@ -248,7 +248,7 @@ public class CarRentalManager implements CarRentalService {
     }
 
     private void checkIfReturnedDayIsOutOfDateForIndividual(IndividualRentEndModel individualRentEndModel , CarRental carRental) throws BusinessException {
-        if(individualRentEndModel.getEndCarRentalRequest().getReturnDate() != carRental.getRentalReturnDate()) {
+        if(individualRentEndModel.getEndCarRentalRequest().getReturnDate().isAfter(carRental.getRentalReturnDate())) {
 
             CreateCarRentalRequest createCarRentalRequest = manuelMappingForCreateRent(carRental);
             createCarRentalRequest.setRentalDate(carRental.getRentalReturnDate());
@@ -280,7 +280,7 @@ public class CarRentalManager implements CarRentalService {
     }
 
     private void checkIfReturnedDayIsOutOfDateForCorporate(CorporateRentEndModel corporateRentEndModel , CarRental carRental) throws BusinessException {
-        if(corporateRentEndModel.getEndCarRentalRequest().getReturnDate() != carRental.getRentalReturnDate()) {
+        if(corporateRentEndModel.getEndCarRentalRequest().getReturnDate().isAfter(carRental.getRentalReturnDate())) {
 
             CreateCarRentalRequest createCarRentalRequest = manuelMappingForCreateRent(carRental);
             createCarRentalRequest.setRentalDate(carRental.getRentalReturnDate());
@@ -303,11 +303,16 @@ public class CarRentalManager implements CarRentalService {
 
     private List<CreateOrderedAdditionalServiceRequest> getAdditionalServices(int rentalId){
         List<OrderedAdditionalService> additionalServices = this.orderedAdditionalServiceService.getOrderedAdditionalServicesByRentalId(rentalId);
-        List<CreateOrderedAdditionalServiceRequest> orderedAdditionalServiceRequests = new ArrayList<CreateOrderedAdditionalServiceRequest>();
-        for(int i=0;i< additionalServices.size();i++){
-            orderedAdditionalServiceRequests.get(i).setServiceId(additionalServices.get(i).getAdditionalService().getServiceId());
-            orderedAdditionalServiceRequests.get(i).setQuantity(additionalServices.get(i).getQuantity());
-        }
+        List<CreateOrderedAdditionalServiceRequest> orderedAdditionalServiceRequests = additionalServices.stream().map(additionalService ->
+                this.modelMapperService.forRequest().map(additionalService,CreateOrderedAdditionalServiceRequest.class)).collect(Collectors.toList());
+
+        /*if(!additionalServices.isEmpty()) {
+            for (int i = 0; i < additionalServices.size(); i++) {
+                orderedAdditionalServiceRequests.get(i).setServiceId(additionalServices.get(i).getAdditionalService().getServiceId());
+                orderedAdditionalServiceRequests.get(i).setQuantity(additionalServices.get(i).getQuantity());
+            }
+        }*/
+
         return orderedAdditionalServiceRequests;
     }
     /*

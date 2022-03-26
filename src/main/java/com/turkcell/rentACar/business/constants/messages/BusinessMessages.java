@@ -41,6 +41,7 @@ public class BusinessMessages {
         public static final String CAR_MAINTENANCE_NOT_FOUND = "There is no car maintenance with following id: ";
         public static final String NO_CHANGES_NO_NEED_TO_UPDATE = "Initial values are completely equal to update values, no need to update!";
         public static final String CAR_IS_ALREADY_AT_MAINTENANCE = "This car is already in maintenance";
+
     }
 
     public class CarMessages{
